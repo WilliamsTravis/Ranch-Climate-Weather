@@ -1,0 +1,2 @@
+net install parallel, from(https://raw.github.com/gvegayon/parallel/v1.15.8.19/)
+mata mata mlib index
