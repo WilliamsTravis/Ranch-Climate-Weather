@@ -30,7 +30,7 @@ if platform == 'win32':
     gdal.UseExceptions()
     print("GDAL version:" + str(int(gdal.VersionInfo('VERSION_NUM'))))
 else:
-    homepath = "/Ranch-Climate-Weather/"
+    homepath = "/Ranch_Climate_Weather/"
     os.chdir(homepath)
     from flask_caching import Cache # I have this one working on Linux but not Windows :)
     

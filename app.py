@@ -10,13 +10,14 @@ Created on Sun Jul  8 15:23:41 2018
 ################################# Switching to/from Ubuntu VPS ##############################################################
 
 from sys import platform
+import sys
 import os
 
 if platform == 'win32':
     homepath = "G:\\My Drive\\NOT THESIS\\Shrum-Williams\\Ranch-Climate-Weather"
     os.chdir(homepath)
 else:
-    homepath = "/Ranch-Climate-Weather/"
+    homepath = "/Ranch_Climate_Weather/"
     os.chdir(homepath)
 #############################################################################################################################
 from functions import *
