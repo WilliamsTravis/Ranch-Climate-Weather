@@ -10,7 +10,7 @@ from sys import platform
 import os
 
 if platform == 'win32':
-    homepath = "G:\\My Drive\\NOT THESIS\\Shrum-Williams\\Ranch-Climate-Weather"
+    homepath = "C:/Users/User/github/Ranch-Climate-Weather"
     os.chdir(homepath)
     from flask_cache import Cache # I have this one working on Windows but not Linux
     import gdal

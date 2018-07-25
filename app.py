@@ -14,8 +14,8 @@ import sys
 import os
 
 if platform == 'win32':
-    homepath = "G:\\My Drive\\NOT THESIS\\Shrum-Williams\\Ranch-Climate-Weather"
-    statapath = "C:\Program Files (x86)\Stata15\Stata-64"
+    homepath = "C:/Users/User/github/Ranch-Climate-Weather"
+    statapath = "C:/Program Files (x86)/Stata15/Stata-64"
     # Stata subprocess call - with call()
     def doStata(dofile, *params):
         cmd = [statapath,"/e","do",dofile]
@@ -24,7 +24,7 @@ if platform == 'win32':
         return(subprocess.call(cmd))
         
     # The template model
-    dofile =r'STATA\models\py_template.do'
+    dofile ='STATA/models/py_template.do'
 
     os.chdir(homepath)
 else:
@@ -38,7 +38,7 @@ else:
         return(subprocess.call(cmd))
         
     # The template model
-    dofile =r'STATA\models\py_template.do'
+    dofile ='STATA/models/py_template.do'
 
     os.chdir(homepath)
 #############################################################################################################################
@@ -49,12 +49,6 @@ from functions import *
 
 # In[]:
 source_signal = '[ "xtreg logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.time", "500", "all", "all", "all", "all","all"]'
-
-# Read in model outputs
-model_folder = "stata\\outputs\\"
-values = glob.glob(model_folder+"*csv")
-labels = [path[len(model_folder):] for path in values]
-modeloptions = [{"label": labels[i], "value": values[i]} for i in range(len(values))]
 
 # Get unprojected coordinates
 #coordinates = pd.read_csv("G:\\my drive\\not thesis\\shrum-williams\\project\\data\\tables\\US_auctions.csv")
@@ -475,11 +469,11 @@ def global_store(signal):
     
     # Add filters to the formula if needed
     if len(filters[filters == "all"]) == 5: # Uses aggregated data frame
-        which_df = "data\\tables\\rmw\\noaa_"+radii_filter+"_standardized_central_all.csv"
+        which_df = "data/tables/rmw/noaa_"+radii_filter+"_standardized_central_all.csv"
     else:
         # Choose which df to read in - this one needs to built first
-        df = pd.read_csv("data\\tables\\rmw\\noaa_"+str(radii_filter)+"_standardized_central.csv")
-        which_df = "data\\tables\\rmw\\py_temp.csv"
+        df = pd.read_csv("data/tables/rmw/noaa_"+str(radii_filter)+"_standardized_central.csv")
+        which_df = "data/tables/rmw/py_temp.csv"
         df['region'] = df['region'].apply(str)
         
         # For checking for month filters and creating the df
@@ -528,7 +522,7 @@ def global_store(signal):
     doStata(dofile,formula, which_df, y)
     
     # get path from dropdown and read csv
-    model = pd.read_csv("STATA\\outputs\\py_temp\\pyout.csv")
+    model = pd.read_csv("STATA/outputs/py_temp/pyout.csv")
     locales = model['locale'].unique()
     ids = [int(i) for i in range(len(locales))]
     points = dict(zip(locales,ids))
@@ -577,7 +571,7 @@ def compute_value(n_clicks,formula,radii_filter,region_filter,class_filter,frame
 def toggleTable(click):
 
     # Read in CSV of coefficients, standard errors, and model fit. 
-    results = pd.read_csv("STATA\\results\\py_temp\\py_result.csv")
+    results = pd.read_csv("STATA/results/py_temp/py_result.csv")
     results.columns = ["Variable","Coefficient", "Standard Error", "P-Value"]
     results = results.drop(results.index[0])   
     rows = results.to_dict('RECORDS')

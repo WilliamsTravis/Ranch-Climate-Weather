@@ -18,8 +18,8 @@ Notes:
       1.  Stata is running in batch mode.
       2.  Unicode is supported; see help unicode_advice.
 
-. do STATA\models\py_template.do "xtreg logweight winter1 spring1 summer1 fall1
->  winter2 spring2 summer2 fall2 i.time" data\tables\rmw\noaa_500_standardized_
+. do STATA/models/py_template.do "xtreg logweight winter1 spring1 summer1 fall1
+>  winter2 spring2 summer2 fall2 i.time" data/tables/rmw/noaa_500_standardized_
 > central_all.csv logweight 
 
 . //clear everything out
@@ -41,6 +41,8 @@ Notes:
 . import delimited `which'
 (77 vars, 19,550 obs)
 
+. //import delimited "/Ranch-Market-Weather/data/tables/rmw/noaa_500_standardiz
+> ed_central_all.csv"
 . local y `3'
 
 . display y
