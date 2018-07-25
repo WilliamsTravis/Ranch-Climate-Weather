@@ -486,7 +486,7 @@ def global_store(signal):
             else:
                 fltr = filters[pos][varnum]
                 if type(fltr) is not list:
-                    fltr = list(fltr)
+                    fltr = [fltr]
             df = df[df[filter_vars[varnum]].apply(str).isin(fltr)]
             return df
         
