@@ -25,6 +25,11 @@ local x7 `9'
 local x8 `10'
 local x9 `11'
 local x10 `12'
+local x11 `13'
+local x12 `14'
+local x13 `15'
+local x14 `16'
+local x15 `17'
 
 // Set date and time 
 egen id = group(polyid)
@@ -34,7 +39,7 @@ xtset id time
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// Model #1 //////////////////////////////////////	
 ////////////////////////////////////////////////////////////////////////////////
-eststo: xtreg `y' `x1' `x2' `x3' `x4' `x5' `x6' `x7' `x8' `x9' `x10', fe vce(robust) 
+eststo: xtreg `y' `x1' `x2' `x3' `x4' `x5' `x6' `x7' `x8' `x9' `x10' `x11' `x12' `x13' `x14' `x15', fe vce(robust) 
 
 esttab using "STATA/results/py_temp/py_result.csv", cells("b(fmt(4)) se(fmt(4)) p(fmt(4)star)") replace r2 plain
 
