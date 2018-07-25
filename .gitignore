@@ -8,4 +8,6 @@ STATA/stata15/ado
 STATA/results/py_temp/py_result.csv
 STATA/outputs/py_temp/
 STATA/results/py_temp/
+py_template_win.log
+py_template_linux.log
 
