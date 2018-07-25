@@ -16,7 +16,7 @@ import os
 if platform == 'win32':
     homepath = "C:/Users/User/github/Ranch-Climate-Weather"
     statapath = "C:/Program Files (x86)/Stata15/Stata-64"
-    dopath = "STATA/models/py_template.do"
+    dopath = "STATA/models/py_template_win.do"
     
     # Stata subprocess call - with call()
     def doStata(dopath, *params):
@@ -29,7 +29,7 @@ if platform == 'win32':
     os.chdir(homepath)
 else:
     homepath = "/Ranch-Climate-Weather/"
-    dopath = "STATA/models/py_template.do"
+    dopath = "STATA/models/py_template_linux.do"
     # Stata subprocess call - with call()
     def doStata(dopath, *params):
         cmd = ["stata","-b","do",dopath]
@@ -432,7 +432,6 @@ def global_store(signal):
     # signal = source_signal
     signal = json.loads(signal)    
     formula = signal[0]
-    last_formula = formula # To avoid recalculating for map type changes
     radii_filter = str(signal[1])
     print(radii_filter)
     y = str(formula.split(" ")[0])
