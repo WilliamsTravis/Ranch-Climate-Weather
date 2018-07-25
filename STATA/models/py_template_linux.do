@@ -9,8 +9,8 @@ local which `1'
 set matsize 600
 
 // import data
-//import delimited `which'
-import delimited "data/tables/rmw/noaa_500_standardized_central_all.csv"
+import delimited `which'
+//import delimited "data/tables/rmw/noaa_500_standardized_central_all.csv"
 
 // create formula 
 local y `2'
@@ -36,7 +36,7 @@ xtset id time
 ////////////////////////////////////////////////////////////////////////////////
 eststo: xtreg `y' `x1' `x2' `x3' `x4' `x5' `x6' `x7' `x8' `x9' `x10', fe vce(robust) 
 
-esttab using "STATA\results\py_temp\py_result.csv", cells("b(fmt(4)) se(fmt(4)) p(fmt(4)star)") replace r2 plain
+esttab using "STATA/results/py_temp/py_result.csv", cells("b(fmt(4)) se(fmt(4)) p(fmt(4)star)") replace r2 plain
 
 predict predictions, xb 
 //predictions 
@@ -48,6 +48,6 @@ predict stnderror, stdp
 //standardized error
 predict u, u
 predict e, e
-export delimited locale date month year dateid x y `y' weight count price adj_price adj_revenue lat lon predictions predictions_u residuals stnderror u e using "STATA\outputs\py_temp\pyout.csv", replace
+export delimited locale date month year dateid x y `y' weight count price adj_price adj_revenue lat lon predictions predictions_u residuals stnderror u e using "STATA/outputs/py_temp/pyout.csv", replace
 
 clear
