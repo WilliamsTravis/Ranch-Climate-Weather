@@ -28,7 +28,7 @@ if platform == 'win32':
 
     os.chdir(homepath)
 else:
-    homepath = "/Ranch_Climate_Weather/"
+    homepath = "/Ranch-Climate-Weather/"
     statapath = "/STATA/stata15/..?"
     # Stata subprocess call - with call()
     def doStata(dofile, *params):
