@@ -7,8 +7,20 @@ Created on Sun Jul  8 15:23:41 2018
 
 @author: User
 """
-# Get packages and set gdal
-runfile('C:/Users/User/github/PRF-ALTIND/functions.py', wdir='C:/Users/User/github/PRF-ALTIND')
+# In[]:
+################################# Switching to/from Ubuntu VPS ##############################################################
+
+from sys import platform
+import os
+
+if platform == 'win32':
+    homepath = "G:\\My Drive\\NOT THESIS\\Shrum-Williams\\Ranch-Climate-Weather"
+    os.chdir(homepath)
+else:
+    homepath = "/Ranch-Market-Weather/"
+    os.chdir(homepath)
+#############################################################################################################################
+from functions import *
 
 # Set working directory
 import os
@@ -21,7 +33,6 @@ import subprocess
 import sys
 import threading
 
-os.chdir("G:\\my drive\\not thesis\\shrum-williams\\project\\")
 
 # In[]:
 source_signal = '[ "xtreg logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.time", "500", "all", "all", "all", "all","all"]'
@@ -85,7 +96,7 @@ def doStata(dofile, *params):
     return(subprocess.call(cmd))
     
 # The template model
-dofile =r'G:\My Drive\NOT THESIS\Shrum-Williams\project\STATA\models\py_template.do'
+dofile =r'STATA\models\py_template.do'
 
 # Stand in for model summary
 rows = [{"Wait for the page to stop updating...":"hold on", "...then click":"ok now!"}]

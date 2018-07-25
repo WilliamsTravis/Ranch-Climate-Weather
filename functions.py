@@ -10,8 +10,8 @@ from sys import platform
 import os
 
 if platform == 'win32':
-    homepath = "G:\\My Drive\\NOT THESIS\\Shrum-Williams\\"
-    os.chdir(homepath + "project")
+    homepath = "G:\\My Drive\\NOT THESIS\\Shrum-Williams\\Ranch-Climate-Weather"
+    os.chdir(homepath)
     from flask_cache import Cache # I have this one working on Windows but not Linux
     import gdal
     import rasterio
@@ -30,8 +30,8 @@ if platform == 'win32':
     gdal.UseExceptions()
     print("GDAL version:" + str(int(gdal.VersionInfo('VERSION_NUM'))))
 else:
-    homepath = "/home/ubuntu/"
-    os.chdir(homepath+"project")
+    homepath = "/Ranch-Market-Weather/"
+    os.chdir(homepath)
     from flask_caching import Cache # I have this one working on Linux but not Windows :)
     
 ##################### Libraries #############################################
