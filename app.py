@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 """
 Create a scatterplot of market analysis residuals
-
+      ~That's funny how this one started :)~
 
 Created on Sun Jul  8 15:23:41 2018
 
