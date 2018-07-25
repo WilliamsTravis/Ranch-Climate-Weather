@@ -30,7 +30,7 @@ if platform == 'win32':
     gdal.UseExceptions()
     print("GDAL version:" + str(int(gdal.VersionInfo('VERSION_NUM'))))
 else:
-    homepath = "/Ranch-Market-Weather/"
+    homepath = "/Ranch-Climate-Weather/"
     os.chdir(homepath)
     from flask_caching import Cache # I have this one working on Linux but not Windows :)
     
@@ -51,11 +51,14 @@ import numpy.ma as ma
 import os
 import pandas as pd
 import plotly
+import progress
+import subprocess
+import sys
 from textwrap import dedent
+import threading
 import time
 from tqdm import *
 import xarray as xr
-
 ##################### Functions ###############################################
 ###########################################################################
 ############## Indexing by Baseline  ######################################
