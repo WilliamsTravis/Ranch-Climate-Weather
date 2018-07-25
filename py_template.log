@@ -18,18 +18,11 @@ Notes:
       1.  Stata is running in batch mode.
       2.  Unicode is supported; see help unicode_advice.
 
-. do STATA/models/py_template.do `xtreg logweight springt summer1' data/tables/
-> rmw/noaa_500_standardized_central_all.csv logweight 
+. do STATA/models/py_template.do logweight spring summer1 data/tables/rmw/noaa_
+> 500_standardized_central_all.csv logweight 
 
 . //clear everything out
 . clear all
-
-. 
-. //Set variables from subroutine calls
-. local formula `1'
-
-. display "`formula'"
-data/tables/rmw/noaa_500_standardized_central_all.csv
 
 . 
 . //Includes function, up to comma
@@ -52,6 +45,12 @@ data/tables/rmw/noaa_500_standardized_central_all.csv
 103340.52
 
 . 
+. //Set variables from subroutine calls
+. local formula `1'
+
+. display `formula'
+6.3865256
+
 . 
 . // Set date and time 
 . egen id = group(polyid)
@@ -71,31 +70,29 @@ data/tables/rmw/noaa_500_standardized_central_all.csv
 > /////////////////////////////////////////////////////////////////////////////
 > ///
 > 
-. eststo: xtreg logweight spring1 summer1, fe vce(robust) 
+. eststo: xtreg `formula', fe vce(robust) 
 
 Fixed-effects (within) regression               Number of obs     =     19,550
 Group variable: id                              Number of groups  =        140
 
 R-sq:                                           Obs per group:
-     within  = 0.0017                                         min =          1
-     between = 0.0017                                         avg =      139.6
-     overall = 0.0009                                         max =        199
+     within  = 0.0000                                         min =          1
+     between = 0.0044                                         avg =      139.6
+     overall =      .                                         max =        199
 
-                                                F(2,139)          =      13.70
-corr(u_i, Xb)  = -0.0602                        Prob > F          =     0.0000
+                                                F(0,139)          =          .
+corr(u_i, Xb)  =      .                         Prob > F          =          .
 
                                    (Std. Err. adjusted for 140 clusters in id)
 ------------------------------------------------------------------------------
              |               Robust
    logweight |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
-     spring1 |   .0119455   .0065494     1.82   0.070    -.0010039    .0248949
-     summer1 |   .0302606   .0089596     3.38   0.001     .0125459    .0479754
-       _cons |   6.376721   .0034749  1835.07   0.000     6.369851    6.383592
+       _cons |   6.394834   2.77e-11  2.3e+11   0.000     6.394834    6.394834
 -------------+----------------------------------------------------------------
-     sigma_u |  .13864671
-     sigma_e |  .08366768
-         rho |  .73304999   (fraction of variance due to u_i)
+     sigma_u |  .13859206
+     sigma_e |  .08373353
+         rho |  .73258753   (fraction of variance due to u_i)
 ------------------------------------------------------------------------------
 (est1 stored)
 
