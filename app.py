@@ -15,9 +15,31 @@ import os
 
 if platform == 'win32':
     homepath = "G:\\My Drive\\NOT THESIS\\Shrum-Williams\\Ranch-Climate-Weather"
+    statapath = "C:\Program Files (x86)\Stata15\Stata-64"
+    # Stata subprocess call - with call()
+    def doStata(dofile, *params):
+        cmd = [statapath,"/e","do",dofile]
+        for param in params:
+            cmd.append(param)
+        return(subprocess.call(cmd))
+        
+    # The template model
+    dofile =r'STATA\models\py_template.do'
+
     os.chdir(homepath)
 else:
     homepath = "/Ranch_Climate_Weather/"
+    statapath = "/STATA/stata15/..?"
+    # Stata subprocess call - with call()
+    def doStata(dofile, *params):
+        cmd = ["stata","do",statapath]
+        for param in params:
+            cmd.append(param)
+        return(subprocess.call(cmd))
+        
+    # The template model
+    dofile =r'STATA\models\py_template.do'
+
     os.chdir(homepath)
 #############################################################################################################################
 from functions import *
@@ -79,15 +101,6 @@ cache.init_app(server)
 # Create global chart template
 mapbox_access_token = 'pk.eyJ1IjoidHJhdmlzc2l1cyIsImEiOiJjamZiaHh4b28waXNkMnptaWlwcHZvdzdoIn0.9pxpgXxyyhM6qEF_dcyjIQ'
 
-# Stata subprocess call - with call()
-def doStata(dofile, *params):
-    cmd = ["C:\Program Files (x86)\Stata15\Stata-64","/e","do",dofile]
-    for param in params:
-        cmd.append(param)
-    return(subprocess.call(cmd))
-    
-# The template model
-dofile =r'STATA\models\py_template.do'
 
 # Stand in for model summary
 rows = [{"Wait for the page to stop updating...":"hold on", "...then click":"ok now!"}]
