@@ -17,21 +17,12 @@ if platform == 'win32':
     homepath = "G:\\My Drive\\NOT THESIS\\Shrum-Williams\\Ranch-Climate-Weather"
     os.chdir(homepath)
 else:
-    homepath = "/Ranch-Market-Weather/"
+    homepath = "/Ranch-Climate-Weather/"
     os.chdir(homepath)
 #############################################################################################################################
 from functions import *
 
-# Set working directory
-import os
-import glob
-import os
-import pandas as pd
-import progress
-#import pytablewriter
-import subprocess
-import sys
-import threading
+
 
 
 # In[]:
