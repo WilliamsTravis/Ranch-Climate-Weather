@@ -29,10 +29,10 @@ if platform == 'win32':
     os.chdir(homepath)
 else:
     homepath = "/Ranch-Climate-Weather/"
-    dopath = "/STATA/models/py_template.do"
+    dopath = "STATA/models/py_template.do"
     # Stata subprocess call - with call()
     def doStata(dofile, *params):
-        cmd = ["stata","do",dopath]
+        cmd = ["stata","-b","do",dopath]
         for param in params:
             cmd.append(param)
         return(subprocess.call(cmd))

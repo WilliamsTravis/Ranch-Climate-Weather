@@ -1,5 +1,5 @@
 //clear everything out
-clear all
+//clear all
 
 //Set variables from subroutine calls
 local formula `1' //Includes function, up to comma
@@ -10,7 +10,7 @@ set matsize 600
 
 // import data
 import delimited `which'
-//import delimited "/Ranch-Market-Weather/data/tables/rmw/noaa_500_standardized_central_all.csv"
+//import delimited "data/tables/rmw/noaa_500_standardized_central_all.csv"
 local y `3'
 display y
 
