@@ -32,7 +32,8 @@ else:
     dopath = "STATA/models/py_template_linux.do"
     # Stata subprocess call - with call()
     def doStata(dopath, *params):
-        cmd = ["stata","-b","do",dopath]
+       
+	cmd = ["stata","-b","do",dopath]
         for param in params:
             cmd.append(param)
         return(subprocess.call(cmd))
