@@ -16,35 +16,31 @@ import os
 if platform == 'win32':
     homepath = "C:/Users/User/github/Ranch-Climate-Weather"
     statapath = "C:/Program Files (x86)/Stata15/Stata-64"
+    dopath = "STATA/models/py_template.do"
+    
     # Stata subprocess call - with call()
-    def doStata(dofile, *params):
-        cmd = [statapath,"/e","do",dofile]
+    def doStata(dopath, *params):
+        cmd = [statapath,"/e","do",dopath]
         for param in params:
             cmd.append(param)
         return(subprocess.call(cmd))
         
-    # The template model
-    dofile ='STATA/models/py_template.do'
-
+    # Set working directory
     os.chdir(homepath)
 else:
     homepath = "/Ranch-Climate-Weather/"
     dopath = "STATA/models/py_template.do"
     # Stata subprocess call - with call()
-    def doStata(dofile, *params):
+    def doStata(dopath, *params):
         cmd = ["stata","-b","do",dopath]
         for param in params:
             cmd.append(param)
         return(subprocess.call(cmd))
-        
-    # The template model
-    dofile ='STATA/models/py_template.do'
-
+    
+    # Set working directory
     os.chdir(homepath)
 #############################################################################################################################
 from functions import *
-
-
 
 
 # In[]:
@@ -518,9 +514,9 @@ def global_store(signal):
         print("############## Df2 columns: " + str(df2.columns))
         df2.to_csv(which_df)
 
-#    if formula != last_formula:
-    doStata(dofile,formula, which_df, y)
-    
+    #   Finally, run STATA
+    doStata(dopath,formula, which_df, y)
+
     # get path from dropdown and read csv
     model = pd.read_csv("STATA/outputs/py_temp/pyout.csv")
     locales = model['locale'].unique()
