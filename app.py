@@ -31,6 +31,7 @@ else:
     homepath = "/Ranch-Climate-Weather/"
     dopath = "STATA/models/py_template_linux.do"
     # Stata subprocess call - with call()
+<<<<<<< HEAD
     def doStata(dopath, which_df, formula):
         f = formula.split(" ")
         params = [f[i] for i in range(len(f))]
@@ -38,6 +39,11 @@ else:
         for e in empties:
             params.append(e)
         cmd =  ["stata","-b","do",dopath,which_df]
+=======
+    def doStata(dopath, *params):
+       
+	cmd = ["stata","-b","do",dopath]
+>>>>>>> a5fdde8cd86cc08d75a6ddd4444b5b9c2bc0e01f
         for param in params:
             cmd.append(param)
         return(subprocess.call(cmd))
