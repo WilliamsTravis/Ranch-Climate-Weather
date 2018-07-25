@@ -44,7 +44,7 @@ from functions import *
 
 
 # In[]:
-source_signal = '[ "xtreg logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.time", "500", "all", "all", "all", "all","all"]'
+source_signal = '[ "logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.time", "500", "all", "all", "all", "all","all"]'
 
 # Get unprojected coordinates
 #coordinates = pd.read_csv("G:\\my drive\\not thesis\\shrum-williams\\project\\data\\tables\\US_auctions.csv")
@@ -152,7 +152,7 @@ app.layout = html.Div([
                             dcc.Input(id = "formula",
                                       placeholder='y x1 x2 x3 ... ',
                                       type='text',
-                                      value= "xtreg logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.time",
+                                      value= "logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.time",
                                       style={'width': '100%'}),
                                       ],
                                     className = "seven columns",
@@ -435,7 +435,7 @@ def global_store(signal):
     last_formula = formula # To avoid recalculating for map type changes
     radii_filter = str(signal[1])
     print(radii_filter)
-    y = str(formula.split(" ")[1])
+    y = str(formula.split(" ")[0])
     
     
     # Get list of filter names
@@ -647,7 +647,7 @@ def makeMap(signal,map_type,output_type):
     formula = signal[0]
 
     # Get the dependent variable
-    dependent = str(formula.split(" ")[1])
+    dependent = str(formula.split(" ")[0])
     
     # Check which output
     if output_type == "observations":
@@ -745,7 +745,7 @@ def makeTrend(signal,output_type, clickData):
     formula = signal[0]
     
     print(formula)
-    dependent = str(formula.split(" ")[1])
+    dependent = str(formula.split(" ")[0])
     print(dependent)
     
     # Check which output
@@ -908,7 +908,7 @@ def makeSeries(signal,output_type,clickData):
     
     # Get the dependent variable
     formula = signal[0]
-    dependent = str(formula.split(" ")[1])
+    dependent = str(formula.split(" ")[0])
     
     # Check which output
     if output_type == "observations":
