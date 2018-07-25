@@ -5,7 +5,7 @@ import subprocess
 dopath = "STATA/models/py_template.do"
 which_df = "data/tables/rmw/noaa_500_standardized_central_all.csv"
 y = 'logweight'
-formula = 'xtreg logweight spring1 summer1'
+formula = "xtreg logweight spring summer1"
 # Stata subprocess call - with call()
 def doStata(dopath, *params):
     cmd = ["stata","-b","do",dopath]
