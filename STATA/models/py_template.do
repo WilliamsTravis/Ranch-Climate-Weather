@@ -9,7 +9,8 @@ local which `2' // Two files, one temp for aggregatation & one to stay the same
 set matsize 600
 
 // import data
-import delimited `which'
+//import delimited `which'
+import delimited "/Ranch-Market-Weather/data/tables/rmw/noaa_500_standardized_central_all.csv"
 local y `3'
 display y
 
