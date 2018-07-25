@@ -31,13 +31,17 @@ else:
     homepath = "/Ranch-Climate-Weather/"
     dopath = "STATA/models/py_template_linux.do"
     # Stata subprocess call - with call()
-    def doStata(dopath, *params):
-       
-	cmd = ["stata","-b","do",dopath]
+    def doStata(dopath, which_df, formula):
+        f = formula.split(" ")
+        params = [f[i] for i in range(len(f))]
+        empties = [" " for i in range(10 -len(f))]
+        for e in empties:
+            params.append(e)
+        cmd =  ["stata","-b","do",dopath,which_df]
         for param in params:
             cmd.append(param)
         return(subprocess.call(cmd))
-    
+        
     # Set working directory
     os.chdir(homepath)
 #############################################################################################################################
@@ -515,8 +519,11 @@ def global_store(signal):
         df2.to_csv(which_df)
 
     #   Finally, run STATA
-    doStata(dopath,formula, which_df, y)
-
+    if platform == 'win32':
+        doStata(dopath,formula, which_df, y)
+    else:
+        doStata(dopath,which_df, formula)
+        
     # get path from dropdown and read csv
     model = pd.read_csv("STATA/outputs/py_temp/pyout.csv")
     locales = model['locale'].unique()

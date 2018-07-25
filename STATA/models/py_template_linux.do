@@ -14,7 +14,6 @@ import delimited "data/tables/rmw/noaa_500_standardized_central_all.csv"
 
 // create formula 
 local y `2'
-display y
 local x1 `3'
 local x2 `4'
 local x3 `5'
