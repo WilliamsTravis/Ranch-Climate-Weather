@@ -5,5 +5,7 @@ STATA/Stata15Linux64.tar.gz
 STATA/auto.dta
 STATA/stata15/utilities/
 STATA/stata15/ado
+STATA/results/py_temp/py_result.csv
 STATA/outputs/py_temp/
 STATA/results/py_temp/
+
