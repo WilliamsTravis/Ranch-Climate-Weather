@@ -257,7 +257,6 @@ app.layout = html.Div([
                                            {'label':"2","value": "2"},
                                            {'label':"2 to 3","value": "2_3"},
                                            {'label':"3","value": "3"},
-                                           {'label':"3 to 4","value": "3_4"},
                                            {'label':"4","value": "4"},
                                            {'label':"All","value":"all"}],
                                 value = "all"
