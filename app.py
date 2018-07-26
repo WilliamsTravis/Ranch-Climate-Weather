@@ -101,6 +101,16 @@ mapbox_access_token = 'pk.eyJ1IjoidHJhdmlzc2l1cyIsImEiOiJjamZiaHh4b28waXNkMnptaW
 # Stand in for model summary
 rows = [{"Wait for the page to stop updating...":"hold on", "...then click":"ok now!"}]
 
+# Get dates 
+date1 = datetime.date(2002,1,1).strftime('%b %Y')
+date2 = datetime.date(2018,7,1).strftime('%b %Y')
+dates = pd.DataFrame(pd.date_range(date1,date2,freq='MS'))
+dates.columns = ["date"]
+dates['date'] = pd.to_datetime(dates['date'])
+dates['date'] = dates['date'].dt.strftime('%b %Y')
+dates = np.array(dates['date'])
+
+
 # Map Layout:
 # Check this out! https://paulcbauer.shinyapps.io/plotlylayout/
 layout = dict(
@@ -146,6 +156,10 @@ app.layout = html.Div([
                         
                 ################ hidden signal list  #################      
                 html.Div(id='signal',
+                         style={'display': 'none'}
+                    ),
+                html.Div(id='date_div',
+                         children = dates,
                          style={'display': 'none'}
                     ),
 
@@ -558,6 +572,8 @@ def retrieve_data(signal):
                ])
 def compute_value(n_clicks,formula,radii_filter,region_filter,class_filter,framesize_filter,grade_filter,month_filter):
     print("############################ month_filter = " + str(month_filter) + " type = " + str(type(month_filter)))
+    if len(month_filter) == 0:
+        month_filter = "all"
     if type(month_filter) is list and len(month_filter) >1:
         month_filter = ",".join(month_filter)
     elif type(month_filter) is list:
@@ -812,6 +828,7 @@ def makeTrend(signal,output_type, clickData):
     monthlydf = df.groupby(['month'])["predictions_u","residuals_u",dependent].apply(lambda x: np.mean(x))
     monthlydf = pd.DataFrame(monthlydf)
     monthlydf['month'] = monthlydf.index
+    monthlydf.index = monthlydf.index.set_names(['index'])
     monthlydf['month_abbr'] = monthlydf['month'].map(months)
     
     # sort properly
@@ -822,7 +839,7 @@ def makeTrend(signal,output_type, clickData):
     yaxis = monthlydf[output_type]
     print(type(yaxis))
     xaxis = monthlydf['month_abbr']
-    
+#    xaxis = [months.get(i) for i in range(1,13)]
     # Set conditional y-axis scale
     # For maximum
     if output_type == "residuals_u":
@@ -897,8 +914,9 @@ def makeTrend(signal,output_type, clickData):
 @app.callback(Output("timeseries","figure"),
               [Input("signal","children"),
                Input("output_type","value"),
-               Input("main_graph","clickData")])
-def makeSeries(signal,output_type,clickData):
+               Input("main_graph","clickData"),
+               Input("date_div","children")])
+def makeSeries(signal,output_type,clickData,dates):
     
     # Before any click is made
     if clickData is None:
@@ -934,31 +952,33 @@ def makeSeries(signal,output_type,clickData):
     else:
         output_print = "Observations"
 
-    model_nout = model[model['locale'].str.contains("Video") != True]
     if output_type == "residuals_u":
-        minimum = np.nanmin(model_nout[output_type])
-        maximum = np.nanmax(model_nout[output_type])
+        minimum = np.nanmin(model[output_type])
+        maximum = np.nanmax(model[output_type])
     else:
-        minimum_r = np.nanmin(model_nout[dependent])
-        minimum_o = np.nanmin(model_nout["predictions_u"])
+        minimum_r = np.nanmin(model[dependent])
+        minimum_o = np.nanmin(model["predictions_u"])
         minimum = min(minimum_r, minimum_o)
     
-        maximum_r = np.nanmax(model_nout[dependent])
-        maximum_o = np.nanmax(model_nout["predictions_u"])
+        maximum_r = np.nanmax(model[dependent])
+        maximum_o = np.nanmax(model["predictions_u"])
         maximum = max(maximum_r, maximum_o)
 
     # Get timeseries of residuals at the clickData location
     df = model[model['pointIndex'] == pointIndex]
-    colors = np.where(df[output_type] > 0, "red", "blue")
     location = str(df['locale'].unique()[0])
     
-    
-    # Get dates
-    dates = np.array(df['date'])
-    
     # Get residuals
-    df = np.array(df[output_type])
-    
+    res = np.array(df[['date',output_type]])
+    pos = np.where(np.isin(dates,np.array(df['date'])))
+    dates2 = [[date,np.nan] for date in dates]
+    i =0
+    for p in pos[0]:
+        dates2[p][1] = res[i][1]
+        i +=1
+    values = np.array([d[1] for d in dates2])
+    colors = np.where(values > 0, "red", "blue")
+
     # Set up y-axis 
     yaxis = dict(
         title = output_print + " Time Series",
@@ -975,7 +995,7 @@ def makeSeries(signal,output_type,clickData):
             type = "bar",
             marker = dict(color = colors),#line = dict(width = 1.25, color = "#000000")),
             x = dates,
-            y = df
+            y = values
             )]
     
     layout['title'] = "<b>" + output_print + " Time Series - " + location + "</b>"
