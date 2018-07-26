@@ -494,7 +494,7 @@ def global_store(signal):
             df = splitCheck(filter_vars,filters,pos, i-1, df)
        
         # Use the arguments to determine how to group and aggregate 
-        id_list = [['locale','year','month'],filter_vars]
+        id_list = [['locale','date'],filter_vars]
         group_list = [l for sl in id_list for l in sl]
         df['total_count'] = df.groupby(group_list)['count'].transform("sum")
         df['total_weight'] = df['weight'] * df['count']
