@@ -50,7 +50,7 @@ from functions import *
 
 
 # In[]:
-source_signal = '[ "logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.time", "500", "all", "all", "all", "all","all"]'
+source_signal = '[ "logweight L12.logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.month", "500", "all", "all", "all", "all","all"]'
 
 # Get unprojected coordinates
 #coordinates = pd.read_csv("G:\\my drive\\not thesis\\shrum-williams\\project\\data\\tables\\US_auctions.csv")
@@ -519,7 +519,6 @@ def global_store(signal):
         df['adj_revenue'] = df.groupby(group_list)['adj_revenue'].transform("sum")
         df['revenue'] = df['price']/100 * df['count'] * df['weight']
         df['revenue'] = df.groupby(group_list)['revenue'].transform("sum")
-
         # now unselect the non-grouping columns
         non_vars = list(set(possible_vars)-set(filter_vars))
         drop_vars = [["logweight","Unnamed: 0","count","weight"], non_vars]
