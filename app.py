@@ -172,7 +172,7 @@ app.layout = html.Div([
                             dcc.Input(id = "formula",
                                       placeholder='y x1 x2 x3 ... ',
                                       type='text',
-                                      value= "logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.time",
+                                      value= "logweight L12.logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.month",
                                       style={'width': '100%'}),
                                       ],
                                     className = "seven columns",
