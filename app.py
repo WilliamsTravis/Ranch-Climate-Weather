@@ -55,7 +55,63 @@ source_signal = '[ "logweight L12.logweight winter1 spring1 summer1 fall1 winter
 # Get unprojected coordinates
 #coordinates = pd.read_csv("G:\\my drive\\not thesis\\shrum-williams\\project\\data\\tables\\US_auctions.csv")
 #coordinates.columns = ["locale","lat","long"]
+description  = ''
+description_text = '''
+##### 
 
+This  is an exploratory  tool  used  in a project aimed  at discovering 
+a  climate signal in cattle  market data. The  idea  is  that,  given a
+history  of a climate  variable, such as local or market-wide rainfall, 
+it should be  possible to  predict market fluctuations such as  average 
+weights,  counts,  or  price. Dry land  grazing operations  like cattle
+production  are  expected to exhibit a  stronger  signal than practices 
+such as irrigated  grain production.  The idea  behind this tool  is to 
+utilize the power of a statistical program called STATA for econometric
+panel modeling while taking  advantage of Python  libraries to  quickly 
+observe spatial and temporal  trends of model predictions and residuals
+following  specification. It  was designed specifically for researchers 
+at the  University of  Colorado  Boulder to  work collaboratively  with 
+researchers from other institutions on  this  problem. This  product is 
+a test version, so please be patient of bugs or non-responsiveness.  It 
+will  improve  over time in terms of  complexity and  functionality, as
+well as in general performance. 
+
+This tool uses cattle auction reports from 141 live auctions throughout
+the central US that were collected between 2002 and 2017 by  the USDA's 
+Agricultural Marketing  Service.  Monthly aggregations of  these market 
+reports are associated with indexed precpitation values derived  from a 
+product of NOAA's Climate  Prediction Center called  the Unified Gauge-
+based Analysis of  Precipitation  over  CONUS. Precipitation  variables 
+represent the  average index  value  for each location and time periods 
+with one of four market radii: 100, 300, 500, and 700 km. These monthly 
+variables are available for the month of sale ('t0'), as a lagged value 
+of precipitation from 2 years (24 months) prior  to  sale ("t1 - t24"), 
+as the precipitation value of  specific prior months for 2  years prior 
+to sale  ("Jan1 - Dec2"), or as  an aggregated seasonal  value of prior 
+(or current) seasons (for example, "Spr1" for the  precipitation values 
+of  the  spring  preceeding  sale and "Spr2" for  values of  the spring 
+before that). For seasonal precipitation values that fall in the season 
+of the observed sale,  the  suffix  "1"  corresponds  to  precipitation 
+values  within  the current  season up to  the point  of sale,  and the 
+suffix "2"  corresponds to  the  respective season of the  prior  year. 
+
+Please follow the popover text for instruction on how to use each 
+element of the dashboard below. 
+
+Earth Lab – CIRES at the University of Colorado Boulder
+Author: Travis Williams
+Email: Travis.Williams@colorado.edu
+Date: 7-15-2018-2018
+                        '''
+                        
+# Hover info text
+stata_info = ("Enter a STATA formula here using the variable list to the right. Variables are separated with a space, the "+
+              "first element is the dependent variable and all subsequent variables are independent. Use 'i.' as a prefix to "+
+              "set fixed time effects. Here, use the variables 'year' for year, 'month' for month, or 'time' for every monthly time-step. "+
+              "Use the prefix 'LN.' to specify a lagged predictor from N months back. " +
+              "This model uses a fixed-effects panel model algorithm with heterosketasticity robust standard errors clustered by "+
+              "location. The template in STATA appears as such: xtreg `formula', fe vce(robust).")
+                                    
 # Map type options
 maptypes = [{'label':'Light','value':'light'},
             {'label':'Dark','value':'dark'},
@@ -151,8 +207,21 @@ app.layout = html.Div([
                         
                         html.H1("An Econometric Model of Cattle Market Climate Impacts",
                                 style = {'font-weight':'1000px ! important'},
-                                )
+                                ),
+                        html.Button(id = 'description_button',
+                            children = 'Project Description (Click)',
+                            title = description,
+                            type='button'),
                         ]),
+                html.Div(
+                    [
+                        dcc.Markdown(id = "description",
+                                    children = description)
+                    ],
+                    style = {'text-align':'justify',
+                             'margin-left':'0',
+                             'margin-right': '1000'}
+                    ),
                         
                 ################ hidden signal list  #################      
                 html.Div(id='signal',
@@ -174,8 +243,15 @@ app.layout = html.Div([
                                       type='text',
                                       value= "logweight L12.logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.month",
                                       style={'width': '100%'}),
+                            html.Button(id='stata_info',
+                                    title = stata_info,
+                                    type='button',
+                                    n_clicks = 0,
+                                    children='Map Info \uFE56 (Hover)'),
                                       ],
                                     className = "seven columns",
+                                    style = {"margin-top":"100"},
+
                                 ),
     
                         # Variable Options
@@ -187,6 +263,7 @@ app.layout = html.Div([
                                     options = variables),
                                     ],
                                 className = "five columns",
+                                style = {"margin-top":"100"},
                                 ),
                             ],
                         className = "row",
@@ -638,17 +715,16 @@ def toggleConstant(click,rows):
         C = ""
     return C
 
-#@app.callback(Output('model_n', 'children'),
-#              [Input('summary_button', 'n_clicks'),
-#               Input('summary','rows')])
-#def toggleSE(click,rows):
-#    if not click:
-#        click = 0
-#    if click%2 == 1:
-#        SE = "Standard Error: " + rows[?].get('Coefficient') 
-#    else:
-#        SE = ""
-#    return SE
+@app.callback(Output('description', 'children'),
+              [Input('description_button', 'n_clicks')])
+def toggleDescription(click):
+    if not click:
+        click = 0
+    if click%2 == 1:
+        description = description_text
+    else:
+        description = ""
+    return description
 
 
 # In[]              
