@@ -111,11 +111,12 @@ stata_info = ("Enter a STATA formula here using the variable list to the right. 
               "set fixed time effects. Here, use the variables 'year' for year, 'month' for month, or 'time' for every monthly time-step. "+
               "Use the prefix 'LN.' to specify a lagged predictor from N months back. " +
               "This model uses a fixed-effects panel model algorithm with heterosketasticity robust standard errors clustered by "+
-              "location. The template in STATA appears as such: xtreg `formula', fe vce(robust).")
+              "location. The template in STATA appears as such: \n\nxtreg `formula', fe vce(robust)\n\n with the variable `formula' corresponding "+
+              "to the contents of this entry box")
 
 map_info = ("This map displays the average value of the chosen output across the study period for each location. "+
             "Hover over each point to see the name of the auction and the value. Scroll to zoom in and out, "+
-            "click and drag to pan, and hold control while clicking and dragging to change the viewing aspect."+
+            "click and drag to pan, and hold control while clicking and dragging to change the viewing aspect. "+
             "Click on any single point to update the information graphs to the right and below.") 
 
 pattern_info = ("This bar graph displays the average value of the chosen output at the chosen location for each month of the year.")
@@ -164,7 +165,7 @@ mapbox_access_token = 'pk.eyJ1IjoidHJhdmlzc2l1cyIsImEiOiJjamZiaHh4b28waXNkMnptaW
 
 
 # Stand in for model summary
-rows = [{"Wait for the page to stop updating...":"hold on", "...then click":"ok now!"}]
+rows = [{"Wait for the page to stop updating, then click the button...":"", "":""}]
 
 # Get dates 
 date1 = datetime.date(2002,1,1).strftime('%b %Y')
@@ -220,7 +221,8 @@ app.layout = html.Div([
                         html.Button(id = 'description_button',
                             children = 'Project Description (Click)',
                             title = description,
-                            type='button'),
+                            type='button',
+                            style = {'margin-left':'35'}),
                         ]),
                 html.Div(
                     [
@@ -228,7 +230,7 @@ app.layout = html.Div([
                                     children = description)
                     ],
                     style = {'text-align':'justify',
-                             'margin-left':'0',
+                             'margin-left':'35',
                              'margin-right': '1000'}
                     ),
                         
@@ -270,7 +272,8 @@ app.layout = html.Div([
                                 ),
                                   ],
                                 className = "seven columns",
-                                style = {"margin-top":"10"},
+                                style = {"margin-top":"10",
+                                         'margin-left':'35',},
 
                                 ),
 
@@ -297,7 +300,7 @@ app.layout = html.Div([
                 ############# All Radials ##################
                 html.H3("Data Set Filters",
                         style = {
-                                 'margin-left':'10',
+                                 'margin-left':'35',
                                  },),
 
                 html.Div([
@@ -316,7 +319,7 @@ app.layout = html.Div([
                             ],
                           className = "two columns",
                           style = {
-                                 'margin-left':'10',
+                                 'margin-left':'35',
                                  },
                         ),
                                 
@@ -424,7 +427,7 @@ app.layout = html.Div([
                         className = "twelve columns",
                         style = {
 #                               'text-align':'justify',
-                                 'margin-left':'10',
+                                 'margin-left':'35',
                                  'margin-right':'150',
 #                                 'margin-bottom':'75'
                                  "margin-bottom":"10"
@@ -476,7 +479,7 @@ app.layout = html.Div([
 
                         ],
                     style = {'text-align':'justify',
-                             'margin-left':'10',
+                             'margin-left':'35',
                              'margin-right':'750',
                              'margin-bottom':'75'}
                         ),
@@ -500,11 +503,12 @@ app.layout = html.Div([
                                     options = maptypes #'light', 'dark','basic', 'outdoors', 'satellite', or 'satellite-streets'   
                                 ),
                             ],
+                            style = {"margin-left":"35"},
                             className = "two columns",
                             ),
                     ],
 #                    className = "row",
-#                    style = {"margin-bottom":"30"},
+#                    style = {"margin-left":"35"},
                     ),
                         
                 html.Div([
@@ -523,7 +527,9 @@ app.layout = html.Div([
                           className = "two columns",
                           ),
                     ],
-                    className = "row"
+                    className = "row",
+                    style = {"margin-left":"35"},
+
                     ),
                         
                 ##########################################################
@@ -540,7 +546,7 @@ app.layout = html.Div([
                              ],
                             className = "six columns",
                             style={
-#                                    'float':'left',
+                                   "margin-left":"35",
                                    'padding-right':'0',
                                    "margin-right":"0",
                                    "border-right":"0"
@@ -555,7 +561,8 @@ app.layout = html.Div([
                             ],
                             className = "six columns",
                             style={
-                                    'float':'right',
+                                    'width':'47%',
+                                   'float':'right',
                                    'padding-left':'0',
                                    "margin-left":"0",
                                    "border-left":"0"
@@ -573,7 +580,9 @@ app.layout = html.Div([
                                         ),
                          ],
                         className = "twelve columns",
-                        style = {'margin-top':'10'}
+                        style = {'margin-top':'10',
+                                 "margin-left":"35"
+                                 }
                         ),
                 
                 ])
