@@ -59,21 +59,22 @@ description  = ''
 description_text = '''
 ##### 
 
-This  is an exploratory  tool  used  in a project aimed  at discovering 
-a  climate signal in cattle  market data. The  idea  is  that,  given a
-history  of a climate  variable, such as local or market-wide rainfall, 
-it should be  possible to  predict market fluctuations such as  average 
-weights,  counts,  or  price. Dry land  grazing operations  like cattle
-production  are  expected to exhibit a  stronger  signal than practices 
-such as irrigated  grain production.  The idea  behind this tool  is to 
-utilize the power of a statistical program called STATA for econometric
-panel modeling while taking  advantage of Python  libraries to  quickly 
+This  is an exploratory  tool  used  in a research project aimed  at discovering 
+a  climate signal in US cattle  market data. The research idea  is  that,  given a
+history  of observations of a climate  variable, such as local or market-wide rainfall, 
+it should be  possible to  explain some variance of market factors such as  average 
+cattle weights, sale counts,  or local price. Market data of the cattle production industry 
+is  expected to exhibit a particularly strong climate signal compared to that of irrigated  grain 
+production. The reason for this tool  is to 
+utilize the power of a statistical program called STATA, run as a subprocess routine in the background,
+for econometric
+modeling of a market dataset while taking  advantage of certain Python  libraries to  quickly 
 observe spatial and temporal  trends of model predictions and residuals
 following  specification. It  was designed specifically for researchers 
 at the  University of  Colorado  Boulder to  work collaboratively  with 
 researchers from other institutions on  this  problem. This  product is 
 a test version, so please be patient of bugs or non-responsiveness.  It 
-will  improve  over time in terms of  complexity and  functionality, as
+should  improve  over time in terms of  complexity and  functionality, as
 well as in general performance. 
 
 This tool uses cattle auction reports from 141 live auctions throughout
@@ -111,7 +112,15 @@ stata_info = ("Enter a STATA formula here using the variable list to the right. 
               "Use the prefix 'LN.' to specify a lagged predictor from N months back. " +
               "This model uses a fixed-effects panel model algorithm with heterosketasticity robust standard errors clustered by "+
               "location. The template in STATA appears as such: xtreg `formula', fe vce(robust).")
-                                    
+
+map_info = ("This map displays the average value of the chosen output across the study period for each location. "+
+            "Hover over each point to see the name of the auction and the value. Scroll to zoom in and out, "+
+            "click and drag to pan, and hold control while clicking and dragging to change the viewing aspect."+
+            "Click on any single point to update the information graphs to the right and below.") 
+
+pattern_info = ("This bar graph displays the average value of the chosen output at the chosen location for each month of the year.")
+series_info = ("This bar chart shows a time series of individual values for the chosen output at the chosen location for each time step in tnhe study period. "+
+               "Gaps in the time series occur when the selected auction was either closed or that information was not reported by the AMS for any of a variety of reasons.")                               
 # Map type options
 maptypes = [{'label':'Light','value':'light'},
             {'label':'Dark','value':'dark'},
@@ -206,7 +215,7 @@ app.layout = html.Div([
                 html.Div([
                         
                         html.H1("An Econometric Model of Cattle Market Climate Impacts",
-                                style = {'font-weight':'1000px ! important'},
+                                style = {'font-weight': 'bold'},
                                 ),
                         html.Button(id = 'description_button',
                             children = 'Project Description (Click)',
@@ -230,40 +239,52 @@ app.layout = html.Div([
                 html.Div(id='date_div',
                          children = dates,
                          style={'display': 'none'}
-                    ),
-
+                    ), 
+                
+                # Break 
+                html.Hr(style = {'height':'5',
+                                 'border':'none',
+                                 'color': '#e2e2e2',
+                                 'background-color':'#4c4b4b'}),
+                
                 ################# Model Formula input ################
                 html.Div([
                         
+                        html.H2("Model Specification",
+                                style = {'font-weight': 'bold'}),
                         # Formula Entry
                         html.Div([
-                            html.H5("STATA Base Formula"),
+                            html.H3("STATA Base Formula"),
                             dcc.Input(id = "formula",
                                       placeholder='y x1 x2 x3 ... ',
                                       type='text',
                                       value= "logweight L12.logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.month",
                                       style={'width': '100%'}),
                             html.Button(id='stata_info',
-                                    title = stata_info,
-                                    type='button',
-                                    n_clicks = 0,
-                                    children='Map Info \uFE56 (Hover)'),
-                                      ],
-                                    className = "seven columns",
-                                    style = {"margin-top":"100"},
+                                title = stata_info,
+                                type='button',
+                                n_clicks = 0,
+                                children='Formula Info \uFE56 (Hover)',
+#                                style = {'font-size':'8',
+#                                         'padding': '1 1'},
+                                ),
+                                  ],
+                                className = "seven columns",
+                                style = {"margin-top":"10"},
 
                                 ),
+
     
                         # Variable Options
                         html.Div([
-                            html.H5("Variable Choices"),
+                            html.H3("Variable Choices"),
                             dcc.Dropdown(
                                     id = "variables",
                                     placeholder = "Click for dataset variable choices...",
                                     options = variables),
                                     ],
                                 className = "five columns",
-                                style = {"margin-top":"100"},
+                                style = {"margin-top":"10"},
                                 ),
                             ],
                         className = "row",
@@ -274,6 +295,11 @@ app.layout = html.Div([
 
                                         
                 ############# All Radials ##################
+                html.H3("Data Set Filters",
+                        style = {
+                                 'margin-left':'10',
+                                 },),
+
                 html.Div([
                     
                     # Market Radius 
@@ -289,6 +315,9 @@ app.layout = html.Div([
                                 ),
                             ],
                           className = "two columns",
+                          style = {
+                                 'margin-left':'10',
+                                 },
                         ),
                                 
                     # Study Region            
@@ -393,14 +422,30 @@ app.layout = html.Div([
       
                         ],
                         className = "twelve columns",
-                        style = {"margin":"0 auto",
-                                 "margin-bottom":"30"},
+                        style = {
+#                               'text-align':'justify',
+                                 'margin-left':'10',
+                                 'margin-right':'150',
+#                                 'margin-bottom':'75'
+                                 "margin-bottom":"10"
+                                 },
                     ),
                                 
                                 
                     ],
                   className = "row",
                 ),
+                
+                # Break 
+                html.Hr(style = {'height':'5',
+                                 'border':'none',
+                                 'color': '#e2e2e2',
+                                 'background-color':'#4c4b4b'}),
+                                 
+                # Summary Table
+                html.H2("Model Summary",
+                        style = {'font-weight':'bold',
+                                 }),
                 html.Div([
                         html.Button(id = "summary_button",
                                         title = "Click for model summary",
@@ -431,15 +476,21 @@ app.layout = html.Div([
 
                         ],
                     style = {'text-align':'justify',
-                             'margin-left':'150',
-                             'margin-right':'150',
+                             'margin-left':'10',
+                             'margin-right':'750',
                              'margin-bottom':'75'}
                         ),
                        
-
+                # Break 
+                html.Hr(style = {'height':'5',
+                                 'border':'none',
+                                 'color': '#e2e2e2',
+                                 'background-color':'#4c4b4b'}),
 
                 ######################### Outputs #############################
                 ############## Map Selection ###############
+                html.H2("Model Outputs",
+                        style = {'font-weight':'bold'}),
                 html.Div([
                     html.Div([  
                         html.H5("Map Type"),
@@ -453,7 +504,7 @@ app.layout = html.Div([
                             ),
                     ],
 #                    className = "row",
-                    style = {"margin-bottom":"30"},
+#                    style = {"margin-bottom":"30"},
                     ),
                         
                 html.Div([
@@ -481,6 +532,10 @@ app.layout = html.Div([
                     # The Map        
                     html.Div([
                             dcc.Graph(id = "main_graph"),  
+                            html.Button("Map Info",
+                                        title = map_info
+                                        ),
+
     
                              ],
                             className = "six columns",
@@ -494,6 +549,9 @@ app.layout = html.Div([
                     # Seasonal trend graph
                     html.Div([
                             dcc.Graph(id = "trend_graph"), # The seasonal trend graph
+                            html.Button("Monthly Pattern Info",
+                                        title = pattern_info
+                                        ),
                             ],
                             className = "six columns",
                             style={
@@ -509,9 +567,13 @@ app.layout = html.Div([
                             
                 # The Time Series Graph
                 html.Div([
-                        dcc.Graph(id = "timeseries")
+                        dcc.Graph(id = "timeseries"),
+                        html.Button("Time Series Info",
+                                        title = series_info
+                                        ),
                          ],
-                        className = "twelve columns"
+                        className = "twelve columns",
+                        style = {'margin-top':'10'}
                         ),
                 
                 ])
@@ -972,7 +1034,7 @@ def makeTrend(signal,output_type, clickData):
             
     print(str(type(xaxis)))
 
-    layout['title'] = "<b>Seasonal Trends - <br>" + location + "</b>"  
+    layout['title'] = "<b>Monthly Patterns - <br>" + location + "</b>"  
     print(layout['title'])
     layout['yaxis'] = yaxis_spec
     layout['xaxis'] = xaxis_spec
