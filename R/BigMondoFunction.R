@@ -16,16 +16,8 @@ The goal is to take a series of shapefiles and find the average
 ##~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~
 "
-setwd("G:/My Drive/NOT THESIS/Shrum-Williams/project/")
+setwd("C:/Users/User/github/")
 source('R/econometric_functions.R')
-
-########################### Calling Big Mondo Function ###############################################
-indexpaths= c("data/rasters/tifs/noaa_indexed/albers/")
-indexnames = "noaa"
-lagname = "t"
-datarange = c(0,1)
-ninclusion = FALSE 
-central = TRUE
 
 ########################### Big Mondo Function #######################################################
 bigRMWFunction = function(indexpath,bufferdists,lagname,datarange,ninclusion,central = TRUE){
@@ -442,6 +434,10 @@ bigRMWFunction = function(indexpath,bufferdists,lagname,datarange,ninclusion,cen
   
 
 ################################## Function call ####################################
+########################### Calling Big Mondo Function ###############################################
+indexpaths= c("data/rasters/albers/pdsisc")
+indexpaths= "data/rasters/albers/pdsisc"
+indexnames = "pdsisc"
 bufferdists = c(100,300,500,700)
 lagname = "t"
 datarange = c(0,1)
@@ -449,12 +445,15 @@ ninclusion = TRUE
 central = TRUE
 
 # Save it all into the main rds file
-for(i in seq(length(indexpaths))){
-  df = bigRMWFunction(indexpaths[i],bufferdists,lagname,datarange,ninclusion,central)
-  savepath = paste0("data/tables/rmw/",indexnames[i],"_",bufferdists[i],"_standardized_central.rds")
-  saveRDS(df,file = savepath)
-}
+# for(i in seq(length(indexpaths))){
+#   df = bigRMWFunction(indexpaths[i],bufferdists,lagname,datarange,ninclusion,central)
+#   savepath = paste0("data/tables/rmw/",indexnames[i],"_",bufferdists[i],"_standardized_central.rds")
+#   saveRDS(df,file = savepath)
+# }
 
+df = bigRMWFunction(indexpaths[i],bufferdists,lagname,datarange,ninclusion,central)
+savepath = paste0("data/tables/rmw/",indexnames[i],"_",bufferdists[i],"_standardized_central.rds")
+saveRDS(df,file = savepath)
 df = readRDS("data/tables/rmw/noaa_standardized_central.rds")
 
 # Save each radius separately

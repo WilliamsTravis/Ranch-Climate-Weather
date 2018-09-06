@@ -10,7 +10,7 @@ Author: Travis
 ##~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~
 "
-setwd("G:/My Drive/not thesis/shrum-williams/project")
+setwd("C:/Users/User/github/")
 library(stringr)
 library(dplyr)
 

@@ -52,6 +52,7 @@ import os
 import pandas as pd
 import plotly
 import progress
+import re 
 import subprocess
 import sys
 from textwrap import dedent

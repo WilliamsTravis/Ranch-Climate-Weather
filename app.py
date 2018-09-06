@@ -55,6 +55,7 @@ source_signal = '[ "logweight L12.logweight winter1 spring1 summer1 fall1 winter
 # Get unprojected coordinates
 #coordinates = pd.read_csv("G:\\my drive\\not thesis\\shrum-williams\\project\\data\\tables\\US_auctions.csv")
 #coordinates.columns = ["locale","lat","long"]
+log = ''
 description  = ''
 description_text = '''
 ##### 
@@ -445,6 +446,7 @@ app.layout = html.Div([
                                  'color': '#e2e2e2',
                                  'background-color':'#4c4b4b'}),
                                  
+                ############## Display Model Dianostics ########################
                 # Summary Table
                 html.H2("Model Summary",
                         style = {'font-weight':'bold',
@@ -483,6 +485,32 @@ app.layout = html.Div([
                              'margin-right':'750',
                              'margin-bottom':'75'}
                         ),
+                    
+                    # Toggle log file display
+                    html.Div([
+                        html.H2("Stata Log file",
+                                style = {'font-weight': 'bold'},
+                                ),
+                        html.Button(id = 'log_button',
+                            children = 'Process Information (Click)',
+                            title = "Click this to display this most recent STATA log",
+                            type='button',
+                            style = {'margin-left':'35'}),
+                        ]),
+                html.Div(
+                    [
+#                        dcc.Markdown(id = "log_text",
+#                                    children = log)
+                    html.Iframe(id = 'log_text',
+                                srcDoc='',
+                                style = {'width':'50%',
+                                         'height':'500%'})
+
+                    ],
+                    style = {'text-align':'justify',
+                             'margin-left':'35',
+                             'margin-right': '50'}
+                    ),
                        
                 # Break 
                 html.Hr(style = {'height':'5',
@@ -584,9 +612,7 @@ app.layout = html.Div([
                                  "margin-left":"35"
                                  }
                         ),
-                html.Div([
-                        html.Iframe(src = "py_template_win.txt")
-                ]),
+
                 ])
 
 # In[]:
@@ -799,7 +825,34 @@ def toggleDescription(click):
         description = ""
     return description
 
+@app.callback(Output('log_text','srcDoc'),
+              [Input('log_button','n_clicks')])
+def buildLog(click):
+    if platform == "win32":
+        log_file = "py_template_win.log"
+    else:
+        log_file = "py_template_linux.log"
+    log_text = "".join(open(log_file,"r").readlines())
+    log_text = re.sub("\n","<br>",log_text)
+    if not click:
+        click = 0
+    if click%2 == 1:
+        log = log_text
+    else:
+        log = ""
+    return log 
 
+@app.callback(Output('log_text','style'),
+              [Input('log_button','n_clicks')])
+def toggleLog(click):
+    if not click:
+        click = 0
+    if click%2 == 1:
+        style = {'width':'50%',
+                'height':'500%'}
+    else:
+        style = {'display':'none'}
+    return style 
 # In[]              
 @app.callback(Output("main_graph","figure"),
               [Input("signal","children"),
