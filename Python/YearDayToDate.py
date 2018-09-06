@@ -61,13 +61,9 @@ def tifCollect(rasterpath, indexname, mask, years):
     return indexlist 
 
         
-indexlist = tifCollect(rasterpath,"NOAA", mask,[1948,2018]) # Careful the last year got omitted last time, somehow
+indexlist = tifCollect(rasterpath,"NOAA", mask,[1948,2018]) 
 toRasters(indexlist,"data\\rasters\\tifs\\noaa_raw\\",geom,proj)    
-        
-# indexlist2 = readRasters("data\\rasters\\tifs\\noaa_raw\\",-9999)[0]
-        
-        
-        
+
         
         
      

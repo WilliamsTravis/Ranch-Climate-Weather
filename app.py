@@ -120,7 +120,7 @@ map_info = ("This map displays the average value of the chosen output across the
             "Click on any single point to update the information graphs to the right and below.") 
 
 pattern_info = ("This bar graph displays the average value of the chosen output at the chosen location for each month of the year.")
-series_info = ("This bar chart shows a time series of individual values for the chosen output at the chosen location for each time step in tnhe study period. "+
+series_info = ("This bar chart shows a time series of individual values for the chosen output at the chosen location for each time step in the study period. "+
                "Gaps in the time series occur when the selected auction was either closed or that information was not reported by the AMS for any of a variety of reasons.")                               
 # Map type options
 maptypes = [{'label':'Light','value':'light'},
@@ -231,7 +231,7 @@ app.layout = html.Div([
                     ],
                     style = {'text-align':'justify',
                              'margin-left':'35',
-                             'margin-right': '1000'}
+                             'margin-right': '50'}
                     ),
                         
                 ################ hidden signal list  #################      
@@ -584,7 +584,9 @@ app.layout = html.Div([
                                  "margin-left":"35"
                                  }
                         ),
-                
+                html.Div([
+                        html.Iframe(src = "py_template_win.txt")
+                ]),
                 ])
 
 # In[]:

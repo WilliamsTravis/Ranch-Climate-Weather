@@ -7,14 +7,6 @@ Created on Fri Jul 13 09:27:47 2018
 
 Playing around with STATA subroutines
 """
-
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jul 15 11:15:26 2018
-
-@author: User
-"""
-
 ################################# Switching to/from Ubuntu VPS ###################
 from sys import platform
 import os
