@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Sun Jul 15 11:15:26 2018
 
@@ -58,9 +57,11 @@ import sys
 from textwrap import dedent
 import threading
 import time
-from tqdm import *
+from tqdm import tqdm
+import warnings
 import xarray as xr
-##################### Functions ###############################################
+
+warnings.filterwarnings("ignore",category = RuntimeWarning)
 ###########################################################################
 ############## Indexing by Baseline  ######################################
 ###########################################################################  
@@ -68,6 +69,7 @@ def index(indexlist,baselinestartyear,baselinendyear):
     '''
         This will find the indexed value to the monthly average. 
     '''        
+    warnings.filterwarnings("ignore")
     indexname = indexlist[0][0][:-7] #Get index name
     baseline = [year for year in indexlist if int(year[0][-6:-2]) >= baselinestartyear and int(year[0][-6:-2]) <= baselinendyear]
     average = monthlies(baseline)
@@ -125,44 +127,321 @@ def readRaster(rasterpath,band,navalue = -9999):
 ######################## Convert multiple rasters #############################
 ####################### into numpy arrays #####################################
 ###############################################################################
-def readRasters(rasterpath,navalue = -9999):
+# Define Numpy array creation routine 
+def readRasters(rasterpath, navalue=-9999):
     """
-    rasterpath = path to folder containing a series of rasters
-    navalue = a number (float) for nan values if we forgot 
-                to translate the file with one originally
-    
-    This converts monthly rasters into numpy arrays and them as a list in another
-            list. The other parts are the spatial features needed to write
-            any results to a raster file. The list order is:
-                
-      [[name_date (string),arraylist (numpy)], spatial geometry (gdal object), coordinate reference system (gdal object)]
-    
-    The file naming convention required is: "INDEXNAME_YYYYMM.tif"
+    Inputs:
+
+        rasterpath = folder containing raster files
+        navalue = a number (float) for nan values if needed
+
+    Outputs:
+
+        named list of numpy arrays  = [[name1,array1],[name2,array2],....]
+        spatial geometry = (upper left coordinate,
+                            x-dimension pixel size,
+                            rotation,
+                            lower right coordinate,
+                            rotation,
+                            y dimension pixel size)
+        coordinate reference system = Well-Known Text Format
+
+    This uses GDAL bindings to read and convert rasters into numpy arrays. The
+        output is a list of numpy arrays and the information needed to write
+        back to a raster format.
 
     """
+    print("Reading in rasters and converting to numpy arrays...")
 
-    alist=[]
-    if rasterpath[-1:] != '\\':
-        rasterpath = rasterpath+'\\'
-    files = sorted(glob.glob(rasterpath+'*.tif'))
+    # Fix possible path inconsistencies
+    rasterpath = os.path.normpath(rasterpath)
+    rasterpath = os.path.join(rasterpath, '')
+
+    # List full path of all files in folder
+    files = glob.glob(rasterpath + '*')
+
+    # Save names for writing files or any useful embedded information
     names = [files[i][len(rasterpath):] for i in range(len(files))]
-    sample = gdal.Open(files[0])
-#    mask = np.array(sample.GetRasterBand(1).ReadAsArray())
-#    mask[mask == 0] = np.nan
-#    mask = mask*0+1
-    geometry = sample.GetGeoTransform()
-    arrayref = sample.GetProjection()
-    del sample
-    for i in tqdm(range(len(files)),position=0): 
-        rast = gdal.Open(files[i])
-        array = np.array(rast.GetRasterBand(1).ReadAsArray())
-        del rast
-        array = array.astype(float)
-        array[array==navalue] = np.nan
-        name = str.upper(names[i][:-4]) #the file name excluding its extention (may need to be changed if the extension length is not 3)
-        alist.append([name,array]) # It's confusing but we need some way of holding these dates. 
-    return(alist,geometry,arrayref)
-    
+
+    # Now iterate over files and convert to numpy array and populate lists
+    crs_list = []
+    geom_list = []
+    numpylist = []
+    exceptions = []
+    for i in tqdm(range(len(files))):
+        try:
+            raster = gdal.Open(files[i])
+            array = np.array(raster.GetRasterBand(1).ReadAsArray())
+
+            # gdal reads some files that aren't rasters, these won't be 2-D
+            if array.ndim == 2:
+
+                # Get spatial reference information to check consistency
+                crs = raster.GetProjection()
+                crs_list.append([names[i], crs])
+                geom = raster.GetGeoTransform()
+                geom_list.append([names[i], geom])
+                del raster
+
+                # Find  length of extension by the position of the last period
+                extension_len = (names[i][::-1].index("."))*-1
+
+                # Set NA Values
+                array[array == navalue] = np.nan
+
+                # Get the file name without the extension
+                name = names[i][:extension_len-1]
+                numpylist.append([name, array])
+
+        except Exception as error:
+            exceptions.append('{0}'.format(error))
+
+
+    # Find locations of spatial mistmatches using the most common geometry
+        # and reference system as the baselines.
+    crses = [c[1] for c in crs_list]
+    crs = max(set(crses), key=crses.count)
+    crs_warning_indx = [i for i, s in enumerate(crses) if crs != s]
+
+    geoms = [g[1] for g in geom_list]
+    geometry = max(set(geoms), key=geoms.count)
+    geom_err_indx = [i for i, s in enumerate(geoms) if geometry != s]
+
+    # Below flags crs mismatches as warnings, but does not remove them from 
+    # the array list because it is possible that they can be reprojected when 
+    # saving back to a raster. It removes elements with mismatched geometries 
+    # and flags these with an error, because reprojection is not as simple in 
+    # this case. Most of the time,though, if one is mismatched the other will
+    # be, too.
+    numpylist = [a for i, a in enumerate(numpylist) if i not in geom_err_indx]
+    crs_warnings = []
+    for c in crs_warning_indx:
+        crs_warnings.append("Warning! Coordinate reference mismatch at " +
+                            "{0}".format(crs_list[c][0]))
+    geom_errors = []
+    for i in geom_err_indx:
+        geom_errors.append("Error! Spatial geometry mismatch at " +
+                           "{0}".format(geom_list[i][0]))
+
+    # Add warnings and errors to exceptions list
+    [exceptions.append(w) for w in crs_warnings]
+    [exceptions.append(e) for e in geom_errors]
+
+    return(numpylist, geometry, crs, exceptions)
+
+######################## Define Raster Manipulation Class #####################
+class RasterArrays:
+    '''
+    This class creates a series of Numpy arrays from a folder containing a
+    series of rasters. With this you can retrieve a named list of arrays, a
+    list of only arrays, and a few general statistics or fields. It also
+    includes several sample methods that might be useful when manipulating or
+    analysing gridded data.
+
+        Initializing arguments:
+
+            rasterpath(string) = directory containing series of rasters.
+            navalue(numeric) = value used for NaN in raster, or user specified
+
+        Attributes:
+
+            namedlist (list) = [[filename, array],[filename, array]...]
+            geometry (tuple) = (spatial geometry): (upper left coordinate,
+                                          x-dimension pixel size,
+                                          rotation,
+                                          lower right coordinate,
+                                          rotation,
+                                          y-dimension pixel size)
+            crs (string) = Coordinate Reference System in Well-Know Text Format
+            arraylist (list) = [array, array...]
+            minimumvalue (numeric)
+            maximumvalue (numeric)
+            averagevalues (Numpy array)
+
+        Methods:
+
+            standardizeArrays = Standardizes all values in arrays
+            calculateCV = Calculates Coefficient of Variation
+            generateHistogram = Generates histogram of all values in arrays
+            toRaster = Writes a singular array to raster
+            toRasters = Writes a list of arrays to rasters
+    '''
+    # Reduce memory use of dictionary attribute storage
+    __slots__ = ('namedlist', 'geometry', 'crs', 'exceptions', 'arraylist',
+                 'minimumvalue', 'maximumvalue', 'averagevalues', 'navalue')
+
+    # Create initial values
+    def __init__(self, rasterpath, navalue=-9999):
+        [self.namedlist, self.geometry,
+         self.crs, self.exceptions] = readRasters(rasterpath, navalue)
+        self.arraylist = [a[1] for a in self.namedlist]
+        self.minimumvalue = np.nanmin(self.arraylist)
+        self.maximumvalue = np.nanmax(self.arraylist)
+        self.averagevalues = np.nanmean(self.arraylist, axis=0)
+        self.navalue = navalue
+
+    # Establish methods
+    def standardizeArrays(self):
+        '''
+        Min/Max standardization of array list, returns a named list
+        '''
+        print("Standardizing arrays...")
+        mins = np.nanmin(self.arraylist)
+        maxes = np.nanmax(self.arraylist)
+        def singleArray(array, mins, maxes):
+            '''
+            calculates the standardized values of a single array
+            '''
+            newarray = (array - mins)/(maxes - mins)
+            return newarray
+
+        standardizedarrays = []
+        for i in range(len(self.arraylist)):
+            standardizedarrays.append([self.namedlist[i][0],
+                                       singleArray(self.namedlist[i][1],
+                                                   mins, maxes)])
+        return standardizedarrays
+
+    def calculateCV(self, standardized=True):
+        '''
+         A single array showing the distribution of coefficients of variation
+             throughout the time period represented by the chosen rasters
+        '''
+        # Get list of arrays
+        if standardized is True:
+            numpyarrays = self.standardizeArrays()
+        else:
+            numpyarrays = self.namedlist
+
+        # Get just the arrays from this
+        numpylist = [a[1] for a in numpyarrays]
+
+        # Simple Cellwise calculation of variance
+        sds = np.nanstd(numpylist, axis=0)
+        avs = np.nanmean(numpylist, axis=0)
+        covs = sds/avs
+
+        return covs
+
+    def generateHistogram(self,
+                          bins=1000,
+                          title="Value Distribution",
+                          xlimit=0,
+                          savepath=''):
+        '''
+        Creates a histogram of the entire dataset for a quick view.
+
+          bins = number of value bins
+          title = optional title
+          xlimit = x-axis cutoff value
+          savepath = image file path with extension (.jpg, .png, etc.)
+        '''
+        print("Generating histogram...")
+        # Get the unnamed list
+        arrays = self.arraylist
+
+        # Mask the array for the histogram (Makes this easier)
+        arrays = np.ma.masked_invalid(arrays)
+
+        # Get min and maximum values
+        amin = np.min(arrays)
+        if xlimit > 0:
+            amax = xlimit
+        else:
+            amax = np.max(arrays)
+
+        # Get the bin width, and the frequency of values within
+        hists, bins = np.histogram(arrays, range=[amin, amax],
+                                   bins=bins, normed=False)
+        width = .65 * (bins[1] - bins[0])
+        center = (bins[:-1] + bins[1:]) / 2
+
+        # Make plotting optional
+        plt.ioff()
+
+        # Create Pyplot figure
+        plt.figure(figsize=(8, 8))
+        plt.bar(center, hists, align='center', width=width)
+        title = (title + ":\nMinimum: " + str(round(amin, 2)) +
+                 "\nMaximum: " + str(round(amax, 2)))
+        plt.title(title, loc='center')
+
+        # Optional write to image
+        if len(savepath) > 0:
+            print("Writing histogram to image...")
+            savepath = os.path.normpath(savepath)
+            if not os.path.exists(os.path.dirname(savepath)):
+                os.mkdir(os.path.dirname(savepath))
+            plt.savefig(savepath)
+            plt.close()
+        else:
+            plt.show()
+
+
+    def toRaster(self, array, savepath):
+        '''
+        Uses the geometry and crs of the rasterArrays class object to write a
+            singular array as a GeoTiff.
+        '''
+        print("Writing numpy array to GeoTiff...")
+        # Check that the Save Path exists
+        savepath = os.path.normpath(savepath)
+        if not os.path.exists(os.path.dirname(savepath)):
+            os.mkdir(os.path.dirname(savepath))
+
+        # Retrieve needed raster elements
+        geometry = self.geometry
+        crs = self.crs
+        xpixels = array.shape[1]
+        ypixels = array.shape[0]
+
+        # This helps sometimes
+        savepath = savepath.encode('utf-8')
+
+        # Create file
+        image = gdal.GetDriverByName("GTiff").Create(savepath,
+                                                     xpixels,
+                                                     ypixels,
+                                                     1,
+                                                     gdal.GDT_Float32)
+        # Save raster and attributes to file
+        image.SetGeoTransform(geometry)
+        image.SetProjection(crs)
+        image.GetRasterBand(1).WriteArray(array)
+        image.GetRasterBand(1).SetNoDataValue(self.navalue)
+
+    def toRasters(self, namedlist, savefolder):
+        """
+        namedlist (list) = [[name, array], [name, array], ...]
+        savefolder (string) = target directory
+        """
+        # Create directory if needed
+        print("Writing numpy arrays to GeoTiffs...")
+        savefolder = os.path.normpath(savefolder)
+        savefolder = os.path.join(savefolder, '')
+        if not os.path.exists(savefolder):
+            os.mkdir(savefolder)
+
+        # Get spatial reference information
+        geometry = self.geometry
+        crs = self.crs
+        sample = namedlist[0][1]
+        ypixels = sample.shape[0]
+        xpixels = sample.shape[1]
+
+        # Create file
+        for array in tqdm(namedlist):
+            image = gdal.GetDriverByName("GTiff").Create(savefolder+array[0] +
+                                                         ".tif",
+                                                         xpixels,
+                                                         ypixels,
+                                                         1,
+                                                         gdal.GDT_Float32)
+            image.SetGeoTransform(geometry)
+            image.SetProjection(crs)
+            image.GetRasterBand(1).WriteArray(array[1])
+#            image.GetRasterBand(1).SetNoDataValue(self.navalue)
+
 ###########################################################################
 ###################### Read Arrays from NPZ or NPY format #################
 ###########################################################################
@@ -172,7 +451,6 @@ def readArrays(path):
         Otherwise it outputs the same results as the readRaster functions. 
         No other parameters required. 
     '''
-    path = 'data\\indices\\noaa_arrays.npz'
     datepath = path[:-10]+"dates"+path[-4:]
     with np.load(path) as data:
         arrays = data.f.arr_0

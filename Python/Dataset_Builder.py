@@ -7,32 +7,51 @@ Created on Mon Sep 10 14:32:10 2018
 
 @author: User
 """
-import datetime as dt
-import os
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+#import datetime as dt
 import geopandas as gpd
+import os
 import pandas as pd
-import rasterio
-from rasterio.mask import mask
 from rasterstats import zonal_stats
+from tqdm import tqdm
+import warnings
+pd.options.mode.chained_assignment = None 
+warnings.simplefilter(action='ignore', category=FutureWarning)
 os.chdir('C:/Users/User/github/Ranch-Climate-Weather/')
 
-from functions import *
-
 # In[]
-# Get Cattle Market Data
-# Pull in AMS text files and convert to tables, potentially automate this step
+
+################# Get or update cattle market data ############################
+'''
+This step can also be done for the raster datasets if we can find the right 
+    date format. For instance, alot of the .nc files from wwdt are grouped 
+    such that all januarydating back to 1895 are grouped in a single file. 
+    That would work, too big, there are often individual tiffs, though.
+'''
+# Get Present Cattle Market Data
+    # Get what we have [pd.read_csv("data/tables/rmw/ams_cattle_data.csv")]
+    # Get the most recent date 
     # ...
+    
+# Pull in AMS text files
+    # Use selenium for https://marketnews.usda.gov/mnp/ls-report-config
+    # Start from the most recent date above
+    # ... 
+    
+# Convert to tables, potentially automate this step
+    # ...
+    
 # Aggregate monthly using weight means or sums
     # ...
+    
 # Associate with coordinates
     # ...
+    
 # Save to file
     # ...
     
 # For now, just pull these fields from our one complete dataset
 cows = pd.read_csv("data/tables/rmw/ams_cattle_data.csv")
+cows['dateid'] = cows['year'].astype(str) + cows['month'].astype(str).apply(lambda x: x.zfill(2)) + "_" + cows['polyid'].astype(str)
 
 # In[]
 # def class to deal with Zonal Statistics and Lag finding
@@ -85,7 +104,7 @@ class Climate_Market_Builder:
         self.ym_field = ym_field
         self.loc_field = loc_field
         
-    def zonalStats(self):
+    def zonalStatMaker(self):
         '''
         Finds zonals stats of raster values within shapefiles
         '''
@@ -116,8 +135,8 @@ class Climate_Market_Builder:
         associates lagged values for each observation with months of the year.
         '''
 #        bigdf = palmerBuilder.zonalStats()
-        bigdf = self.zonalStats()
-        print("Calculating lagged monthly values...")
+        bigdf = self.zonalStatMaker()
+        print("Calculating lagged values by month...")
         
         # Lets get a date index of the full range of possible dates
         dates = [[str(y) + str(m).zfill(2) for y in range(min(bigdf['year']), 
@@ -178,7 +197,7 @@ class Climate_Market_Builder:
         
         # Now find the date number of the target lagged value and join with the
             # location id
-        for lag in lagnames:
+        for lag in tqdm(lagnames,position = 0):
             bigdf[lag] = bigdf['datenum'] - bigdf[lag]
             bigdf[lag] = bigdf[lag].astype(str) + '_' + bigdf['polyid'].astype(str)
             
@@ -199,8 +218,8 @@ class Climate_Market_Builder:
 
 #       Get regular lags: this can be done in the formula of any panel data
 #       package, though...might as well it's quick
-        print("Grabbing the shifted lag values real quick...")
-        for i in range(0,25):
+        print("Calculating regular lagged values...")
+        for i in tqdm(range(0,25), position = 0):
             bigdf['t' + str(i)] = bigdf.groupby(['polyid'])['mean'].shift(i)
         
         bigdf = bigdf.dropna()
@@ -214,51 +233,51 @@ class Climate_Market_Builder:
         
         # make a dictionary of lagged months for each observation month
         dec = {'winter1' : ['t0'],
-                    'spring1' : ['mar1','apr1','may1'],
-                    'summer1' : ['jun1','jul1','aug1'],
-                    'fall1'   : ['sep1','oct1','nov1'],
-                    'winter2' : ['dec1','jan1','feb1'],
-                    'spring2' : ['mar2','apr2','may2'],
-                    'summer2' : ['jun2','jul2','aug2'],
-                   'fall2'   : ['sep2','oct2','nov2']}
+               'spring1' : ['mar1','apr1','may1'],
+               'summer1' : ['jun1','jul1','aug1'],
+               'fall1'   : ['sep1','oct1','nov1'],
+               'winter2' : ['dec1','jan1','feb1'],
+               'spring2' : ['mar2','apr2','may2'],
+               'summer2' : ['jun2','jul2','aug2'],
+               'fall2'   : ['sep2','oct2','nov2']}
         jan = {'winter1' : ['dec1','t0'],
-                   'spring1' : ['mar1','apr1','may1'],
-                   'summer1' : ['jun1','jul1','aug1'],
-                   'fall1'   : ['sep1','oct1','nov1'],
-                   'winter2' : ['dec1','jan1','feb1'],
-                   'spring2' : ['mar2','apr2','may2'],
-                   'summer2' : ['jun2','jul2','aug2'],
-                   'fall2'   : ['sep2','oct2','nov2']}
+               'spring1' : ['mar1','apr1','may1'],
+               'summer1' : ['jun1','jul1','aug1'],
+               'fall1'   : ['sep1','oct1','nov1'],
+               'winter2' : ['dec2','jan1','feb1'],
+               'spring2' : ['mar2','apr2','may2'],
+               'summer2' : ['jun2','jul2','aug2'],
+               'fall2'   : ['sep2','oct2','nov2']}
         feb = {'winter1' : ['dec1','jan1','t0'],
-                    'spring1' : ['mar1','apr1','may1'],
-                    'summer1' : ['jun1','jul1','aug1'],
-                    'fall1'   : ['sep1','oct1','nov1'],
-                    'winter2' : ['dec2','jan2','feb2'],
-                    'spring2' : ['mar2','apr2','may2'],
-                    'summer2' : ['jun2','jul2','aug2'],
-                    'fall2'   : ['sep2','oct2','nov2']}
+               'spring1' : ['mar1','apr1','may1'],
+               'summer1' : ['jun1','jul1','aug1'],
+               'fall1'   : ['sep1','oct1','nov1'],
+               'winter2' : ['dec2','jan2','feb1'],
+               'spring2' : ['mar2','apr2','may2'],
+               'summer2' : ['jun2','jul2','aug2'],
+               'fall2'   : ['sep2','oct2','nov2']}
         mar = {'winter1' : ['dec1','jan1','feb1'],
-                 'spring1' : ['t0'],
-                 'summer1' : ['jun1','jul1','aug1'],
-                 'fall1'   : ['sep1','oct1','nov1'],
-                 'winter2' : ['dec2','jan2','feb2'],
-                 'spring2' : ['mar1','apr1','may1'],
-                 'summer2' : ['jun2','jul2','aug2'],
-                 'fall2'   : ['sep2','oct2','nov2']}
+               'spring1' : ['t0'],
+               'summer1' : ['jun1','jul1','aug1'],
+               'fall1'   : ['sep1','oct1','nov1'],
+               'winter2' : ['dec2','jan2','feb2'],
+               'spring2' : ['mar1','apr1','may1'],
+               'summer2' : ['jun2','jul2','aug2'],
+               'fall2'   : ['sep2','oct2','nov2']}
         apr = {'winter1' : ['dec1','jan1','feb1'],
-                 'spring1' : ['mar1','t0'],
-                 'summer1' : ['jun1','jul1','aug1'],
-                 'fall1'   : ['sep1','oct1','nov1'],
-                 'winter2' : ['dec2','jan2','feb2'],
-                 'spring2' : ['mar1','apr1','may1'],
-                 'summer2' : ['jun2','jul2','aug2'],
-                 'fall2'   : ['sep2','oct2','nov2']}
+               'spring1' : ['mar1','t0'],
+               'summer1' : ['jun1','jul1','aug1'],
+               'fall1'   : ['sep1','oct1','nov1'],
+               'winter2' : ['dec2','jan2','feb2'],
+               'spring2' : ['mar2','apr1','may1'], 
+               'summer2' : ['jun2','jul2','aug2'],
+               'fall2'   : ['sep2','oct2','nov2']}
         may = {'winter1' : ['dec1','jan1','feb1'],
                'spring1' : ['mar1','apr1','t0'],
                'summer1' : ['jun1','jul1','aug1'],
                'fall1'   : ['sep1','oct1','nov1'],
                'winter2' : ['dec2','jan2','feb2'],
-               'spring2' : ['mar1','apr1','may1'],
+               'spring2' : ['mar2','apr2','may1'],
                'summer2' : ['jun2','jul2','aug2'],
                'fall2'   : ['sep2','oct2','nov2']}
         jun = {'winter1' : ['dec1','jan1','feb1'],
@@ -270,59 +289,84 @@ class Climate_Market_Builder:
                'summer2' : ['jun1','jul1','aug1'],
                'fall2'   : ['sep2','oct2','nov2']}
         jul = {'winter1' : ['dec1','jan1','feb1'],
-                'spring1' : ['mar1','apr1','may1'],
-                'summer1' : ['jun1','t0'],
-                'fall1'   : ['sep1','oct1','nov1'],
-                'winter2' : ['dec2','jan2','feb2'],
-                'spring2' : ['mar2','apr2','may2'],
-                'summer2' : ['jun1','jul1','aug1'],
-                'fall2'   : ['sep2','oct2','nov2']}
+               'spring1' : ['mar1','apr1','may1'],
+               'summer1' : ['jun1','t0'],
+               'fall1'   : ['sep1','oct1','nov1'],
+               'winter2' : ['dec2','jan2','feb2'],
+               'spring2' : ['mar2','apr2','may2'],
+               'summer2' : ['jun2','jul1','aug1'],
+               'fall2'   : ['sep2','oct2','nov2']}
         aug = {'winter1' : ['dec1','jan1','feb1'],
-                  'spring1' : ['mar1','apr1','may1'],
-                  'summer1' : ['jun1','jul1','t0'],
-                  'fall1'   : ['sep1','oct1','nov1'],
-                  'winter2' : ['dec2','jan2','feb2'],
-                  'spring2' : ['mar2','apr2','may2'],
-                  'summer2' : ['jun1','jul1','aug1'],
-                  'fall2'   : ['sep2','oct2','nov2']}
+               'spring1' : ['mar1','apr1','may1'],
+               'summer1' : ['jun1','jul1','t0'],
+               'fall1'   : ['sep1','oct1','nov1'],
+               'winter2' : ['dec2','jan2','feb2'],
+               'spring2' : ['mar2','apr2','may2'],
+               'summer2' : ['jun2','jul2','aug1'],
+              'fall2'   : ['sep2','oct2','nov2']}
         sep = {'winter1' : ['dec1','jan1','feb1'],
-                     'spring1' : ['mar1','apr1','may1'],
-                     'summer1' : ['jun1','jul1','aug1'],
-                     'fall1'   : ['t0'],
-                     'winter2' : ['dec2','jan2','feb2'],
-                     'spring2' : ['mar2','apr2','may2'],
-                     'summer2' : ['jun2','jul2','aug2'],
-                     'fall2'   : ['sep1','oct1','nov1']}
-        october = {'winter1' : ['dec1','jan1','feb1'],
-                   'spring1' : ['mar1','apr1','may1'],
-                   'summer1' : ['jun1','jul1','aug1'],
-                   'fall1'   : ['sep','t0'],
-                   'winter2' : ['dec2','jan2','feb2'],
-                   'spring2' : ['mar2','apr2','may2'],
-                   'summer2' : ['jun2','jul2','aug2'],
-                   'fall2'   : ['sep1','oct1','nov1']}
+               'spring1' : ['mar1','apr1','may1'],
+               'summer1' : ['jun1','jul1','aug1'],
+               'fall1'   : ['t0'],
+               'winter2' : ['dec2','jan2','feb2'],
+               'spring2' : ['mar2','apr2','may2'],
+               'summer2' : ['jun2','jul2','aug2'],
+               'fall2'   : ['sep1','oct1','nov1']}
+        octo = {'winter1' : ['dec1','jan1','feb1'],
+               'spring1' : ['mar1','apr1','may1'],
+               'summer1' : ['jun1','jul1','aug1'],
+               'fall1'   : ['sep1','t0'],
+               'winter2' : ['dec2','jan2','feb2'],
+               'spring2' : ['mar2','apr2','may2'],
+               'summer2' : ['jun2','jul2','aug2'],
+               'fall2'   : ['sep2','oct1','nov1']}
         nov = {'winter1' : ['dec1','jan1','feb1'],
-                    'spring1' : ['mar1','apr1','may1'],
-                    'summer1' : ['jun1','jul1','aug1'],
-                    'fall1'   : ['sep','oct','t0'],
-                    'winter2' : ['dec2','jan2','feb2'],
-                    'spring2' : ['mar2','apr2','may2'],
-                    'summer2' : ['jun2','jul2','aug2'],
-                    'fall2'   : ['sep1','oct1','nov1']}
-        
+               'spring1' : ['mar1','apr1','may1'],
+               'summer1' : ['jun1','jul1','aug1'],
+               'fall1'   : ['sep1','oct1','t0'],
+               'winter2' : ['dec2','jan2','feb2'],
+               'spring2' : ['mar2','apr2','may2'],
+               'summer2' : ['jun2','jul2','aug2'],
+               'fall2'   : ['sep2','oct2','nov1']}
+       
         # Okay, now we know which lagged months to average for each season
         seasondict = {1:jan,2:feb,3:mar,4:apr,5:may,6:jun,
-                      7:jul,8:aug,9:sep,10:october,11:nov,12:dec}
-        
+                      7:jul,8:aug,9:sep,10:octo,11:nov,12:dec}
+            
         seasonames = ['winter1','spring1','summer1','fall1',
                        'winter2','spring2','summer2','fall2']
-
-        def rowSet(row):
-            winter1lags  = seasondict.get(row['month']).get('winter1')
-            spring1lags  = seasondict.get(row['month']).get('spring1')
-            row['winter1'] = row[winter1lags].mean()
-            row['spring1'] = row[spring1lags].mean()
         
+        # what if I ran the function on each month separately?
+        # Okay this will work, first create list of monthly dataframes
+        print("Calculating lagged seasonal averages...")
+        dflist = [bigdf[bigdf.month.isin([m])] for m in range(1,13)]
+
+        # now loop through each list and calculate lags   
+        lagdflist= []
+        for df in tqdm(dflist,position = 0):
+            for season in seasonames:
+                lags = seasondict.get(1).get(season)
+                df[season] = df[lags].mean(axis = 1)
+            lagdflist.append(df)
+            
+        # then concatenate the list of altered dataframes into one!
+        bigdf = pd.concat(lagdflist)
+        
+        return bigdf
+        
+    def completeMaker(self, df, join_field):
+        bigdf = self.seasonMaker()
+        print(type(bigdf))
+        print(type(df))
+        
+        # Go ahead and drop repeated columns
+        reps = [bc for bc in bigdf.columns if bc in df.columns and bc != join_field]
+        bigdf = bigdf.drop(reps,axis = 1)
+        bigdf = pd.merge(df,bigdf,on = join_field, how='left')
+    
+        return bigdf
+    
+    
 # In[]          
 # testing...
 rasterpath = "C:/Users/User/github/data/rasters/albers/pdsisc/"
@@ -340,5 +384,7 @@ palmerBuilder = Climate_Market_Builder(rasterpath,
                                        "Locale",
                                        [-10,-4], 
                                        [200001,201704])
-#bigdf = palmerBuilder.zonalStats()
-bigdf = palmerBuilder.monthMaker()
+#bigdf = palmerBuilder.zonalStatMaker()
+#bigdf = palmerBuilder.monthMaker()
+#bigdf = palmerBuilder.seasonMaker()
+bigdf = palmerBuilder.completeMaker(cows,"dateid")
