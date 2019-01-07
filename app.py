@@ -7,7 +7,7 @@ Created on Sun Jul  8 15:23:41 2018
 @author: User
 """
 # In[]:
-################################# Switching to/from Ubuntu VPS ##############################################################
+################################# Switching to/from Ubuntu VPS ################
 
 from sys import platform
 import sys
@@ -17,20 +17,19 @@ if platform == 'win32':
     homepath = "C:/Users/User/github/Ranch-Climate-Weather"
     statapath = "C:/Program Files (x86)/Stata15/Stata-64"
     dopath = "STATA/models/py_template_win.do"
-    
+
     # Stata subprocess call - with call()
     def doStata(dopath, *params):
-        cmd = [statapath,"/e","do",dopath]
+        cmd = [statapath, "/e", "do", dopath]
         for param in params:
             cmd.append(param)
         return(subprocess.call(cmd))
-        
+
     # Set working directory
     os.chdir(homepath)
 else:
     homepath = "/Ranch-Climate-Weather/"
     dopath = "STATA/models/py_template_linux.do"
-    # Stata subprocess call - with call()
 
     def doStata(dopath, which_df, formula):
         f = formula.split(" ")
@@ -38,38 +37,38 @@ else:
         empties = [" " for i in range(10 -len(f))]
         for e in empties:
             params.append(e)
-        cmd =  ["stata","-b","do",dopath,which_df]
+        cmd =  ["stata", "-b", "do", dopath, which_df]
         for param in params:
             cmd.append(param)
         return(subprocess.call(cmd))
-        
+
     # Set working directory
     os.chdir(homepath)
 #############################################################################################################################
 from functions import *
 
-
 # In[]:
-source_signal = '[ "logweight L12.logweight winter1 spring1 summer1 fall1 winter2 spring2 summer2 fall2 i.month", "500", "all", "all", "all", "all","all"]'
+source_signal = ('["logweight L12.logweight winter1 spring1 summer1 fall1' +
+                 'winter2 spring2 summer2 fall2 i.month", "500", "all",' +
+                 '"all", "all", "all","all", "noaa"]')
 
-# Get unprojected coordinates
-#coordinates = pd.read_csv("G:\\my drive\\not thesis\\shrum-williams\\project\\data\\tables\\US_auctions.csv")
-#coordinates.columns = ["locale","lat","long"]
+# Some text items - Move all of these to text files somewhere
 log = ''
-description  = ''
+description = ''
 description_text = '''
 ##### 
 
-This  is an exploratory  tool  used  in a research project aimed  at discovering 
-a  climate signal in US cattle  market data. The research idea  is  that,  given a
-history  of observations of a climate  variable, such as local or market-wide rainfall, 
-it should be  possible to  explain some variance of market factors such as  average 
-cattle weights, sale counts,  or local price. Market data of the cattle production industry 
-is  expected to exhibit a particularly strong climate signal compared to that of irrigated  grain 
-production. The reason for this tool  is to 
-utilize the power of a statistical program called STATA, run as a subprocess routine in the background,
-for econometric
-modeling of a market dataset while taking  advantage of certain Python  libraries to  quickly 
+This  is an exploratory  tool  used  in a research project aimed  at 
+discovering a  climate signal in US cattle  market data. The research idea  is 
+that,  given a history  of observations of a climate  variable, such as local 
+or market-wide rainfall, it should be  possible to  explain some variance of
+market factors such as  average cattle weights, sale counts,  or local price. 
+Market data of the cattle production industry is  expected to exhibit a 
+particularly strong climate signal compared to that of irrigated  grain 
+production. The reason for this tool  is to utilize the power of a statistical
+program called STATA, run as a subprocess routine in the background, for 
+econometric modeling of a market dataset while taking  advantage of certain 
+Python  libraries to  quickly 
 observe spatial and temporal  trends of model predictions and residuals
 following  specification. It  was designed specifically for researchers 
 at the  University of  Colorado  Boulder to  work collaboratively  with 
@@ -107,12 +106,18 @@ Date: 7-15-2018-2018
                         '''
                         
 # Hover info text
-stata_info = ("Enter a STATA formula here using the variable list to the right. Variables are separated with a space, the "+
-              "first element is the dependent variable and all subsequent variables are independent. Use 'i.' as a prefix to "+
-              "set fixed time effects. Here, use the variables 'year' for year, 'month' for month, or 'time' for every monthly time-step. "+
-              "Use the prefix 'LN.' to specify a lagged predictor from N months back. " +
-              "This model uses a fixed-effects panel model algorithm with heterosketasticity robust standard errors clustered by "+
-              "location. The template in STATA appears as such: \n\nxtreg `formula', fe vce(robust)\n\n with the variable `formula' corresponding "+
+stata_info = ("Enter a STATA formula here using the variable list to the " +
+              "right. Variables are separated with a space, the "+
+              "first element is the dependent variable and all subsequent " +
+              "variables are independent. Use 'i.' as a prefix to "+
+              "set fixed time effects. Here, use the variables 'year' for " +
+              "year, 'month' for month, or 'time' for every monthly " + 
+              "time-step. Use the prefix 'LN.' to specify a lagged " + 
+              "predictor from N months back. This model uses a " + 
+              "fixed-effects panel model algorithm with heterosketasticity " +
+              "robust standard errors clustered by location. The template " +
+              "in STATA appears as such: \n\nxtreg `formula', fe vce(robust)" +
+              "\n\n with the variable `formula' corresponding "+
               "to the contents of this entry box")
 
 map_info = ("This map displays the average value of the chosen output across the study period for each location. "+
@@ -123,35 +128,44 @@ map_info = ("This map displays the average value of the chosen output across the
 pattern_info = ("This bar graph displays the average value of the chosen output at the chosen location for each month of the year.")
 series_info = ("This bar chart shows a time series of individual values for the chosen output at the chosen location for each time step in the study period. "+
                "Gaps in the time series occur when the selected auction was either closed or that information was not reported by the AMS for any of a variety of reasons.")                               
+
+# Data Set options
+indexnames = [{'label' : 'CPC Unified Guage Base Precipitation', 
+               'value' : 'noaa'},
+              {'label' : 'Self-Calibrating Palmer Drought Severity Index',
+               'value' : 'pdsisc'},
+              {'label' : 'Palmer Drought Severity Index',
+               'value' : 'pdsi'}]
+
 # Map type options
-maptypes = [{'label':'Light','value':'light'},
-            {'label':'Dark','value':'dark'},
-            {'label':'Basic','value':'basic'},
-            {'label':'Outdoors','value':'outdoors'},
-            {'label':'Satellite','value':'satellite'},
-            {'label':'Satellite Streets','value':'satellite-streets'}]
+maptypes = [{'label' : 'Light', 'value' : 'light'},
+            {'label' : 'Dark', 'value' : 'dark'},
+            {'label' : 'Basic', 'value' : 'basic'},
+            {'label' : 'Outdoors', 'value' : 'outdoors'},
+            {'label' : 'Satellite', 'value' : 'satellite'},
+            {'label' : 'Satellite Streets', 'value' : 'satellite-streets'}]
 
 # Total Variable Choices
-variables = [{"label":'"local" - Auction name and location',"value":"locale"},
-             {"label":'"class" - Class of cow',"value":"class"},
-             {"label":'"grade" - Cow frame size',"value":"grade"},
-             {"label":'"month" - Month',"value":"Month"},
-             {"label":'"year" - Year',"value":"Year"},
-             {"label":'"count" - Total monthly sales',"value":"count"},
-             {"label":'"weight" - Average monthly cattle weight (lbs)',"value":"weight"},
-             {"label":'"price" -  Average price ($/cwt)',"value":"price"},
-             {"label":'"adj_price" - Price adjusted for inflation',"value":"adj_price"},
-             {"label":'"adj_revenue" - Revenue from adjusted price',"value":"adj_revenue"},
-             {"label":'"lat" - Latitude (decimal degrees)',"value":"lat"},
-             {"label":'"lon" - Longitude (decimal degrees)',"value":"lon"},
-             {"label":'"region" - (1 for North or 0 for South)',"value":"region"},
-             {"label":'"t0" - Climate value for month of sale',"value":""},
-             {"label":'"t1 - t24"  - Climate values 1 to 24 months prior to sale',"value":"t1 - t24"},
-             {"label":'"jan1 - dec2"  - Months of climate values 1 to 2 years prior to sale',"value":"jan1 - dec2"},
-             {"label":'"winter1 & winter2" - The 1st or 2nd winter prior to (of) sale',"value":"winter1 & winter2"},
-             {"label":'"spring1 & spring2" - The 1st or 2nd spring prior to (of) sale',"value":"spring1 & spring2"},
-             {"label":'"summer1 & summer2" - The 1st or 2nd summer prior to (of) sale',"value":"summer1 & summer2"},
-             {"label":'"fall1 & fall2" - The first or second fall prior to (of) sale',"value":"fall1 & fall2"},]
+variables = [{"label": '"local" - Auction name and location',"value":"locale"},
+             {"label": '"class" - Class of cow',"value":"class"},
+             {"label": '"grade" - Cow frame size',"value":"grade"},
+             {"label": '"month" - Month',"value":"Month"},
+             {"label": '"year" - Year',"value":"Year"},
+             {"label": '"count" - Total monthly sales',"value":"count"},
+             {"label": '"weight" - Average monthly cattle weight (lbs)',"value":"weight"},
+             {"label": '"price" -  Average price ($/cwt)',"value":"price"},
+             {"label": '"adj_price" - Price adjusted for inflation',"value":"adj_price"},
+             {"label": '"adj_revenue" - Revenue from adjusted price',"value":"adj_revenue"},
+             {"label": '"lat" - Latitude (decimal degrees)',"value":"lat"},
+             {"label": '"lon" - Longitude (decimal degrees)',"value":"lon"},
+             {"label": '"region" - (1 for North or 0 for South)',"value":"region"},
+             {"label": '"t0" - Climate value for month of sale',"value":""},
+             {"label": '"t1 - t24"  - Climate values 1 to 24 months prior to sale',"value":"t1 - t24"},
+             {"label": '"jan1 - dec2"  - Months of climate values 1 to 2 years prior to sale',"value":"jan1 - dec2"},
+             {"label": '"winter1 & winter2" - The 1st or 2nd winter prior to (of) sale',"value":"winter1 & winter2"},
+             {"label": '"spring1 & spring2" - The 1st or 2nd spring prior to (of) sale',"value":"spring1 & spring2"},
+             {"label": '"summer1 & summer2" - The 1st or 2nd summer prior to (of) sale',"value":"summer1 & summer2"},
+             {"label": '"fall1 & fall2" - The first or second fall prior to (of) sale',"value":"fall1 & fall2"},]
 
 # Create DASH application and server
 app = dash.Dash(__name__)
@@ -166,7 +180,10 @@ mapbox_access_token = 'pk.eyJ1IjoidHJhdmlzc2l1cyIsImEiOiJjamZiaHh4b28waXNkMnptaW
 
 
 # Stand in for model summary
-rows = [{"Wait for the page to stop updating, then click the button...":"", "":""}]
+rows = [{"Variable": "",
+         "Coefficient": "",
+         "P-Value": "",
+         "Standard Error": ""}]
 
 # Get dates 
 date1 = datetime.date(2002,1,1).strftime('%b %Y')
@@ -287,7 +304,7 @@ app.layout = html.Div([
                                     placeholder = "Click for dataset variable choices...",
                                     options = variables),
                                     ],
-                                className = "five columns",
+                                className = "four columns",
                                 style = {"margin-top":"10"},
                                 ),
                             ],
@@ -298,17 +315,29 @@ app.layout = html.Div([
         
 
                                         
-                ############# All Radials ##################
+                ############# All Filters ##################
                 html.H3("Data Set Filters",
                         style = {
                                  'margin-left':'35',
                                  },),
 
                 html.Div([
-                    
+                    # Drought Index 
+                    html.Div([
+                            html.H5("Weather Index"),
+                            dcc.Dropdown(
+                                    id = 'index_choice',
+                                    options = indexnames,
+                                    value = "noaa"),
+                                    ],
+                                className = "three columns",
+                            style = {
+                                 'margin-left':'35',
+                                 },
+                        ),
                     # Market Radius 
                     html.Div([
-                        html.H5("Market Radius Distance"),
+                        html.H5("Market Radius"),
                         dcc.RadioItems(
                                 id = "radii_filter",
                                 options = [{'label':"100 km","value":"100"},
@@ -318,10 +347,8 @@ app.layout = html.Div([
                                 value = "500"
                                 ),
                             ],
-                          className = "two columns",
-                          style = {
-                                 'margin-left':'35',
-                                 },
+                          className = "one columns",
+
                         ),
                                 
                     # Study Region            
@@ -335,7 +362,7 @@ app.layout = html.Div([
                                 value = "all"
                                 ),   
                         ],
-                      className = "two columns",
+                      className = "one columns",
                     ),
                                 
                     # Cow Class Filter
@@ -350,7 +377,7 @@ app.layout = html.Div([
                                 value = "all"
                                 ),
                             ],
-                          className = "two columns",
+                          className = "one columns",
                         ),
                                 
                     # Cow Frame size Filter
@@ -367,7 +394,7 @@ app.layout = html.Div([
                                 value = "all"
                                 ),
                             ],
-                          className = "two columns",
+                          className = "one columns",
                         ),
                             
                                                                 
@@ -386,7 +413,7 @@ app.layout = html.Div([
                                 value = "all"
                                 ),
                             ],
-                          className = "two columns",
+                          className = "one columns",
                         ),
                     
                     # Month of Sale Filter
@@ -457,18 +484,10 @@ app.layout = html.Div([
                                         children = "Model Summary Table (click)"
                                         ),
 
-                        html.P(
-                             id = "model_fit"
-                             ),
-                        html.P(
-                             id = "model_n"
-                             ),
-                        html.P(
-                             id = "model_constant"
-                             ),
-#                        html.P(
-#                             id = "model_se"
-#                             ),
+                        html.P(id="model_fit"),
+                        html.P(id="model_n"),
+                        html.P(id="model_constant"),
+#                        html.P(id="model_se"),
                         dt.DataTable(
                              rows = rows,
                              id = "summary",
@@ -630,7 +649,7 @@ def global_store(signal):
     radii_filter = str(signal[1])
     print(radii_filter)
     y = str(formula.split(" ")[0])
-    
+    index_choice = signal[7]
     
     # Get list of filter names
     filter_vars = []
@@ -653,22 +672,27 @@ def global_store(signal):
         filter_vars.append("month")
     
     # Create list of filters, we need to build the formula
-    filters = np.array([class_filter, framesize_filter, grade_filter,region_filter,month_filter])
+    filters = np.array([class_filter, framesize_filter, grade_filter,
+                        region_filter,month_filter])
     pos = np.where(filters!="all")
-#    filters = [[f] for f in filters if type(f) != list]
     
     # Add filters to the formula if needed
     if len(filters[filters == "all"]) == 5: # Uses aggregated data frame
-        which_df = "data/tables/rmw/noaa_"+radii_filter+"_standardized_central_all.csv"
+        which_df = ("data/tables/rmw/" + index_choice + "/" + index_choice + 
+                    "_" + str(radii_filter) + "_standardized_central_agg.csv")
+        
     else:
         # Choose which df to read in - this one needs to built first
-        df = pd.read_csv("data/tables/rmw/noaa_"+str(radii_filter)+"_standardized_central.csv")
+        df = pd.read_csv("data/tables/rmw/" + index_choice +
+                         "/" + index_choice + "_" +
+                         str(radii_filter) + "_standardized_central.csv")
         which_df = "data/tables/rmw/py_temp.csv"
         df['region'] = df['region'].apply(str)
         
         # For checking for month filters and creating the df
         # we have df and a list of filters.
         def splitCheck(filter_vars,filters,pos, varnum,df):
+           
             #Check for month and find its position
             if "," in filters[pos][varnum]:
                 fltr = filters[pos][varnum].split(",")
@@ -695,6 +719,7 @@ def global_store(signal):
         df['adj_revenue'] = df.groupby(group_list)['adj_revenue'].transform("sum")
         df['revenue'] = df['price']/100 * df['count'] * df['weight']
         df['revenue'] = df.groupby(group_list)['revenue'].transform("sum")
+        
         # now unselect the non-grouping columns
         non_vars = list(set(possible_vars)-set(filter_vars))
         drop_vars = [["logweight","Unnamed: 0","count","weight"], non_vars]
@@ -743,10 +768,14 @@ def retrieve_data(signal):
                State('class_filter','value'),
                State('framesize_filter','value'),
                State('grade_filter','value'),
-               State('month_filter','value')
+               State('month_filter','value'),
+               State('index_choice','value')
                ])
-def compute_value(n_clicks,formula,radii_filter,region_filter,class_filter,framesize_filter,grade_filter,month_filter):
-    print("############################ month_filter = " + str(month_filter) + " type = " + str(type(month_filter)))
+def compute_value(n_clicks,formula,radii_filter,region_filter,
+                  class_filter,framesize_filter,grade_filter,
+                  month_filter, index_choice):
+    print("############################ month_filter = " + 
+          str(month_filter) + " type = " + str(type(month_filter)))
     if len(month_filter) == 0:
         month_filter = "all"
     if type(month_filter) is list and len(month_filter) >1:
@@ -756,7 +785,9 @@ def compute_value(n_clicks,formula,radii_filter,region_filter,class_filter,frame
     else:
         month_filter = month_filter
     print("MONTH FILTER == " + str(month_filter))
-    signal = json.dumps([formula,radii_filter,region_filter,class_filter,framesize_filter,grade_filter,month_filter])
+    signal = json.dumps([formula, radii_filter, region_filter, class_filter,
+                         framesize_filter, grade_filter, month_filter, 
+                         index_choice])
     print(signal)
     return signal
 # In[]
@@ -853,6 +884,8 @@ def toggleLog(click):
     else:
         style = {'display':'none'}
     return style 
+
+
 # In[]              
 @app.callback(Output("main_graph","figure"),
               [Input("signal","children"),
@@ -891,11 +924,13 @@ def makeMap(signal,map_type,output_type):
         output_print = "Observations - " + dependent
         
     # Calculate Mean Absolute values or sum if counts
-    if dependent != "count":
+    if dependent is not "count":
         mar = model.groupby(['locale'])[output_type,'lon','lat'].apply(lambda x: np.mean(abs(x)))
+#        print("##############!! Output_type: " + str(mar[dependent][0]))
     else:
         mar = model.groupby(['locale'])[output_type,'lon','lat'].sum()
-        
+#        print("##############!! Output_type: " + str(mar[dependent][0]))
+
     mar['lon'] = -1*mar['lon'] #lazy here
     mar = pd.DataFrame(mar)
     mar['locale'] = mar.index
