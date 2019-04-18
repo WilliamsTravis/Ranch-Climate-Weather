@@ -19,8 +19,8 @@ Notes:
       2.  Unicode is supported; see help unicode_advice.
 
 . do STATA/models/py_template_win.do "logweight L12.logweight winter1 spring1 s
-> ummer1 fall1 winter2 spring2 summer2 fall2 i.month" data/tables/rmw/py_temp.c
-> sv logweight 
+> ummer1 fall1 winter2 spring2 summer2 fall2 i.month" data/tables/rmw/noaa/noaa
+> _500_standardized_central_agg.csv logweight 
 
 . //clear everything out
 . clear all
@@ -41,13 +41,13 @@ Notes:
 . 
 . // import data
 . import delimited `which'
-(79 vars, 13,946 obs)
+(77 vars, 19,550 obs)
 
 . //import delimited "data/tables/rmw/noaa_500_standardized_central_all.csv"
 . local y `3'
 
 . display y
--212407.55
+103340.52
 
 . 
 . 
@@ -71,52 +71,52 @@ Notes:
 > ///
 > eststo: xtreg `formula', fe vce(robust) 
 
-Fixed-effects (within) regression               Number of obs     =     12,421
-Group variable: id                              Number of groups  =         99
+Fixed-effects (within) regression               Number of obs     =     17,381
+Group variable: id                              Number of groups  =        139
 
 R-sq:                                           Obs per group:
-     within  = 0.2311                                         min =          6
-     between = 0.9945                                         avg =      125.5
-     overall = 0.7594                                         max =        187
+     within  = 0.4337                                         min =          6
+     between = 0.9961                                         avg =      125.0
+     overall = 0.7845                                         max =        187
 
-                                                F(20,98)          =      64.82
-corr(u_i, Xb)  = 0.8440                         Prob > F          =     0.0000
+                                                F(20,138)         =     135.98
+corr(u_i, Xb)  = 0.7905                         Prob > F          =     0.0000
 
-                                    (Std. Err. adjusted for 99 clusters in id)
+                                   (Std. Err. adjusted for 139 clusters in id)
 ------------------------------------------------------------------------------
              |               Robust
    logweight |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
    logweight |
-        L12. |   .3807703   .0251712    15.13   0.000     .3308188    .4307218
+        L12. |   .5380161   .0187704    28.66   0.000     .5009014    .5751309
              |
-     winter1 |   .0116001   .0082146     1.41   0.161    -.0047015    .0279016
-     spring1 |   .0050898   .0092717     0.55   0.584    -.0133096    .0234893
-     summer1 |   .0312633   .0112641     2.78   0.007     .0089102    .0536165
-       fall1 |  -.0219008   .0062985    -3.48   0.001    -.0343999   -.0094016
-     winter2 |  -.0121204   .0096828    -1.25   0.214    -.0313356    .0070948
-     spring2 |   .0133677    .010258     1.30   0.196    -.0069889    .0337243
-     summer2 |  -.0361138   .0086987    -4.15   0.000    -.0533761   -.0188516
-       fall2 |  -.0130635   .0087384    -1.49   0.138    -.0304045    .0042774
+     winter1 |   .0096819   .0070514     1.37   0.172    -.0042607    .0236246
+     spring1 |  -.0038584   .0075114    -0.51   0.608    -.0187107    .0109938
+     summer1 |   .0330296   .0093877     3.52   0.001     .0144673     .051592
+       fall1 |  -.0174148   .0062607    -2.78   0.006    -.0297941   -.0050355
+     winter2 |  -.0129323   .0078504    -1.65   0.102    -.0284548    .0025903
+     spring2 |    .007765   .0080301     0.97   0.335    -.0081131     .023643
+     summer2 |  -.0344714   .0077388    -4.45   0.000    -.0497733   -.0191695
+       fall2 |  -.0048539   .0072309    -0.67   0.503    -.0191516    .0094438
              |
        month |
-          2  |   .0058121   .0013854     4.20   0.000     .0030628    .0085613
-          3  |   .0012617   .0022668     0.56   0.579    -.0032368    .0057602
-          4  |  -.0097053   .0031937    -3.04   0.003     -.016043   -.0033676
-          5  |    .000117   .0035381     0.03   0.974    -.0069042    .0071382
-          6  |   .0129712   .0026388     4.92   0.000     .0077345    .0182079
-          7  |   .0134459   .0028709     4.68   0.000     .0077488     .019143
-          8  |   .0064147    .003139     2.04   0.044     .0001855    .0126439
-          9  |  -.0077272   .0032368    -2.39   0.019    -.0141505   -.0013039
-         10  |  -.0203444   .0030587    -6.65   0.000    -.0264143   -.0142744
-         11  |  -.0255666   .0028635    -8.93   0.000    -.0312492    -.019884
-         12  |   -.018304   .0019966    -9.17   0.000    -.0222662   -.0143417
+          2  |   .0056242   .0014167     3.97   0.000     .0028229    .0084255
+          3  |   .0048343    .001683     2.87   0.005     .0015065    .0081622
+          4  |   .0007778   .0022997     0.34   0.736    -.0037693    .0053249
+          5  |   .0087864   .0028089     3.13   0.002     .0032323    .0143406
+          6  |   .0196542   .0029022     6.77   0.000     .0139157    .0253928
+          7  |   .0254068   .0035152     7.23   0.000     .0184562    .0323575
+          8  |   .0242321    .003938     6.15   0.000     .0164455    .0320188
+          9  |   .0124513   .0038497     3.23   0.002     .0048392    .0200634
+         10  |  -.0235259   .0028707    -8.20   0.000    -.0292021   -.0178497
+         11  |  -.0311657   .0024261   -12.85   0.000    -.0359628   -.0263686
+         12  |  -.0223277    .001678   -13.31   0.000    -.0256456   -.0190098
              |
-       _cons |   3.945251   .1591751    24.79   0.000     3.629373    4.261129
+       _cons |   2.963747   .1205008    24.60   0.000      2.72548    3.202013
 -------------+----------------------------------------------------------------
-     sigma_u |  .07860936
-     sigma_e |  .05473781
-         rho |  .67345908   (fraction of variance due to u_i)
+     sigma_u |  .06541695
+     sigma_e |  .06209248
+         rho |  .52605457   (fraction of variance due to u_i)
 ------------------------------------------------------------------------------
 (est1 stored)
 
@@ -127,26 +127,26 @@ corr(u_i, Xb)  = 0.8440                         Prob > F          =     0.0000
 
 . 
 . predict predictions, xb 
-(1,525 missing values generated)
+(2,169 missing values generated)
 
 . //predictions 
 . predict predictions_u, xbu
-(1,525 missing values generated)
+(2,169 missing values generated)
 
 . //predictions plus the fixed effect
 . predict residuals, residual
-(1,525 missing values generated)
+(2,169 missing values generated)
 
 . //residuals from standardized errors?
 . predict stnderror, stdp
-(1,525 missing values generated)
+(2,169 missing values generated)
 
 . //standardized error
 . predict u, u
-(1,525 missing values generated)
+(2,169 missing values generated)
 
 . predict e, e
-(1,525 missing values generated)
+(2,169 missing values generated)
 
 . export delimited locale date month year dateid x y `y' weight count price adj
 > _price adj_revenue lat lon predictions predictions_u residuals stnderror u e 

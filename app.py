@@ -835,8 +835,8 @@ def toggleN(click,rows):
 
 @app.callback(Output('model_constant', 'children'),
               [Input('summary_button', 'n_clicks'),
-               Input('summary','rows')])
-def toggleConstant(click,rows):
+               Input('summary', 'rows')])
+def toggleConstant(click, rows):
     if not click:
         click = 0
     if click%2 == 1:
